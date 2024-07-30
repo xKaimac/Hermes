@@ -3,12 +3,25 @@
   "version": "1.0.0",
   "description": "Backend for Carrier Pigeon",
   "main": "index.js",
+  "type": "module",
   "scripts": {
+    "start": "ts-node src/index.tsx",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alistair Macvicar",
   "license": "ISC",
   "dependencies": {
-    "@auth/express": "^0.6.0"
+    "@auth/express": "^0.6.0",
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "^8.2.0",
+    "@types/express": "^4.17.21",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "tsconfig-paths": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
   }
 }

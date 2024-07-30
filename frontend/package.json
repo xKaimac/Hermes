@@ -9,11 +9,11 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
-
   "dependencies": {
     "@mantine/core": "^7.11.2",
     "@tanstack/react-query": "^5.51.15",
     "@tanstack/react-router": "^1.45.11",
+    "@types/node": "^22.0.0",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "react": "^18.3.1",
@@ -24,7 +24,6 @@
     "@tanstack/router-devtools": "^1.45.11",
     "@tanstack/router-plugin": "^1.45.8",
     "@types/react": "^18.3.3",
-    "typescript": "^5.5.4",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.17.0",
     "@typescript-eslint/parser": "^7.17.0",
@@ -32,6 +31,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.9",
+    "typescript": "^5.5.4",
     "vite": "^5.3.4"
   }
 }
