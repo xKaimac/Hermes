@@ -1,2 +1,7 @@
-export * from "./auth.routes.js";
-export * from "./user.routes.js";
+import Router from "express";
+
+const router = Router();
+
+router.get("/", (req, res, next) => {
+  res.render("index");
+});

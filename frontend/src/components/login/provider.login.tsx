@@ -1,24 +1,5 @@
-const AUTH_URL = import.meta.env.VITE_BACKEND_URL;
-
-type Provider = "google" | "github" | "facebook" | "discord";
-
-interface SignInProps {
-  provider: Provider;
-}
-
-const LoginButton = (props: SignInProps) => {
-  const { provider } = props;
-
-  const handleSignIn = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    window.location.href = `${AUTH_URL}/auth/signin/${provider}`;
-  };
-
-  return (
-    <button onClick={handleSignIn}>
-      Sign in with {provider.charAt(0).toUpperCase() + provider.slice(1)}
-    </button>
-  );
+const LoginButton = () => {
+  return <a href="/login/rederated/google">Sign in with nothing!</a>;
 };
 
 export default LoginButton;

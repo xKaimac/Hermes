@@ -1,14 +1,53 @@
-import { Router } from "express";
-import { httpApiAdapters } from "../utils/index.js";
-import { Auth } from "@auth/core";
-import { getAuthConfig } from "../config/index.js";
+import express from "express";
+import passport from "passport";
 
-const router = Router();
+const router = express.Router();
 
-router.use("/*", async (req, res) => {
-  const request = httpApiAdapters.request.fromExpressToFetch(req);
-  const response = await Auth(request, getAuthConfig(req));
-  await httpApiAdapters.response.fromFetchToExpress(response, res);
+router.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  (req, res) => {
+    res.redirect("/");
+  }
+);
+
+router.get(
+  "/auth/discord",
+  passport.authenticate("discord", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/auth/discord/callback",
+  passport.authenticate("discord", { failureRedirect: "/login" }),
+  (req, res) => {
+    res.redirect("/");
+  }
+);
+
+router.get(
+  "/auth/github",
+  passport.authenticate("github", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/auth/github/callback",
+  passport.authenticate("github", { failureRedirect: "/login" }),
+  (req, res) => {
+    res.redirect("/");
+  }
+);
+
+router.get("/profile", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ user: req.user });
+  } else {
+    res.status(401).json({ message: "Not authenticated" });
+  }
 });
 
-export { router as authRouter };
+export default router;
