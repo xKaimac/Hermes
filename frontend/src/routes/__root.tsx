@@ -4,7 +4,8 @@ import { NavBar } from "../components/navigation/navbar";
 export const Route = createRootRoute({
   component: () => {
     const location = useLocation();
-    const isLoginPage = location.pathname === "/login/";
+    const isLoginPage = location.pathname === "/login";
+    console.log(location);
 
     return (
       <>

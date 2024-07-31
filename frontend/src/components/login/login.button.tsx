@@ -7,7 +7,7 @@ type Provider = {
   name: string;
 };
 
-const LoginButton = ({ name }: Provider) => {
+const LoginButton = ({ name, ...props }: Provider) => {
   const getAuthURL = (): string => {
     const AUTH_URL = import.meta.env.VITE_BACKEND_URL;
     return `${AUTH_URL}/auth/${name}`;
@@ -30,15 +30,17 @@ const LoginButton = ({ name }: Provider) => {
   const color = getIcon().color;
 
   return (
-    <Button
-      component="a"
-      href={getAuthURL()}
-      variant="subtle"
-      color="rgba(0, 0, 0, 1)"
-      size="xl"
-    >
-      <Icon color={color} size="100%" />
-    </Button>
+    <div {...props}>
+      <Button
+        component="a"
+        href={getAuthURL()}
+        variant="subtle"
+        color="rgba(0, 0, 0, 1)"
+        size="xl"
+      >
+        <Icon color={color} size="100%" />
+      </Button>
+    </div>
   );
 };
 

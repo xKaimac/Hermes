@@ -24,7 +24,7 @@ router.get(
 
 router.get(
   "/auth/discord",
-  passport.authenticate("discord", { scope: ["profile", "email"] })
+  passport.authenticate("discord", { scope: ["identify", "email"] })
 );
 
 router.get(
@@ -37,7 +37,7 @@ router.get(
 
 router.get(
   "/auth/github",
-  passport.authenticate("github", { scope: ["profile", "email"] })
+  passport.authenticate("github", { scope: ["user:email"] })
 );
 
 router.get(
@@ -48,21 +48,12 @@ router.get(
   }
 );
 
-router.get("/profile", (req, res) => {
+router.get("/auth/status", (req, res) => {
   if (req.isAuthenticated()) {
-    res.json({ user: req.user });
+    res.json({ isAuthenticated: true, user: req.user });
   } else {
-    res.status(401).json({ message: "Not authenticated" });
+    res.json({ isAuthenticated: false });
   }
-});
-
-router.get("/logout", (req, res, next) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.redirect(FAILURE);
-  });
 });
 
 export default router;
