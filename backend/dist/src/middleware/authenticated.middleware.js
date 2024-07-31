@@ -1,0 +1,25 @@
+import { getToken } from "@auth/core/jwt";
+/**
+ * Ensures that the user is authenticated when accessing a route.
+ * Populates `res.locals` with the decoded JWT token.
+ *
+ * The types for `res.locals` are found in `express.d.ts`
+ */
+export async function authenticatedUser(req, res, next) {
+    const token = await getToken({
+        // TODO: raise issue on how this doesn't actually accept a request object
+        req: {
+            cookies: req.cookies,
+            headers: req.headers,
+        },
+        secret: process.env.AUTH_SECRET,
+    });
+    res.locals.token = token;
+    if (token) {
+        next();
+    }
+    else {
+        res.status(403).send("Unauthorized");
+    }
+}
+//# sourceMappingURL=authenticated.middleware.js.map
