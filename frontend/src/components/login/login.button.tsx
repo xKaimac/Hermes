@@ -7,27 +7,37 @@ type Provider = {
   name: string;
 };
 
-const AUTH_URL = import.meta.env.VITE_BACKEND_URL;
-
 const LoginButton = ({ name }: Provider) => {
-  const getIcon = (): IconType => {
+  const getAuthURL = (): string => {
+    const AUTH_URL = import.meta.env.VITE_BACKEND_URL;
+    return `${AUTH_URL}/auth/${name}`;
+  };
+
+  const getIcon = (): { icon: IconType; color: string } => {
     switch (name) {
       case "google":
-        return FcGoogle;
+        return { icon: FcGoogle, color: "default}" };
       case "github":
-        return FaGithub;
+        return { icon: FaGithub, color: "black" };
       case "discord":
-        return FaDiscord;
+        return { icon: FaDiscord, color: "rgba(88, 101, 242, 1)" };
       default:
         throw new Error(`Unsupported provider: ${name}`);
     }
   };
 
-  const Icon = getIcon();
+  const Icon = getIcon().icon;
+  const color = getIcon().color;
 
   return (
-    <Button variant="subtle" color="rgba(0, 0, 0, 1)" leftSection={<Icon />}>
-      <a href={`${AUTH_URL}/auth/${name}`}>Sign in with {name}</a>
+    <Button
+      component="a"
+      href={getAuthURL()}
+      variant="subtle"
+      color="rgba(0, 0, 0, 1)"
+      size="xl"
+    >
+      <Icon color={color} size="100%" />
     </Button>
   );
 };

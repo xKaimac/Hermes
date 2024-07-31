@@ -1,11 +1,16 @@
-import { Outlet, createRootRoute } from "@tanstack/react-router";
+import { Outlet, createRootRoute, useLocation } from "@tanstack/react-router";
 import { NavBar } from "../components/navigation/navbar";
 
 export const Route = createRootRoute({
-  component: () => (
-    <>
-      <NavBar />
-      <Outlet />
-    </>
-  ),
+  component: () => {
+    const location = useLocation();
+    const isLoginPage = location.pathname === "/login/";
+
+    return (
+      <>
+        {!isLoginPage && <NavBar />}
+        <Outlet />
+      </>
+    );
+  },
 });
