@@ -19,7 +19,6 @@ interface PassportConfig {
 }
 
 export const configurePassport = (config: PassportConfig) => {
-  console.log(config.discord);
   // Google Strategy
   passport.use(
     new GoogleStrategy(
