@@ -2,7 +2,8 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as DiscordStrategy } from "passport-discord";
 import { Strategy as GitHubStrategy } from "passport-github2";
-import { findOrCreateUser, findUserById } from "../services/user.service";
+import { findUserById } from "../services/user.service";
+import findOrCreateUser from "../services/user.service";
 
 interface StrategyConfig {
   clientID: string;
@@ -35,8 +36,11 @@ export const configurePassport = (config: PassportConfig) => {
         done: any
       ) => {
         try {
-          const user = await findOrCreateUser("google", profile);
-          done(null, user);
+          const { user, isFirstLogin } = await findOrCreateUser(
+            "google",
+            profile
+          );
+          done(null, { ...user, isFirstLogin });
         } catch (error) {
           done(error as Error);
         }
@@ -60,8 +64,11 @@ export const configurePassport = (config: PassportConfig) => {
         done: any
       ) => {
         try {
-          const user = await findOrCreateUser("discord", profile);
-          done(null, user);
+          const { user, isFirstLogin } = await findOrCreateUser(
+            "discord",
+            profile
+          );
+          done(null, { ...user, isFirstLogin });
         } catch (error) {
           done(error as Error);
         }
@@ -85,8 +92,11 @@ export const configurePassport = (config: PassportConfig) => {
         done: any
       ) => {
         try {
-          const user = await findOrCreateUser("github", profile);
-          done(null, user);
+          const { user, isFirstLogin } = await findOrCreateUser(
+            "github",
+            profile
+          );
+          done(null, { ...user, isFirstLogin });
         } catch (error) {
           done(error as Error);
         }

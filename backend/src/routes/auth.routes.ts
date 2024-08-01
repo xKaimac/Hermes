@@ -10,45 +10,60 @@ const HERMES_URL = process.env.HERMES_URL || "";
 const FAILURE = `${HERMES_URL}/login`;
 
 router.get(
-  "/auth/google",
+  "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
 router.get(
-  "/auth/google/callback",
+  "/google/callback",
   passport.authenticate("google", { failureRedirect: FAILURE }),
   (req, res) => {
-    res.redirect(HERMES_URL);
+    const user = req.user as any;
+    if (user.isFirstLogin) {
+      res.redirect(`${HERMES_URL}/Username`);
+    } else {
+      res.redirect(HERMES_URL);
+    }
   }
 );
 
 router.get(
-  "/auth/discord",
+  "/discord",
   passport.authenticate("discord", { scope: ["identify", "email"] })
 );
 
 router.get(
-  "/auth/discord/callback",
+  "/discord/callback",
   passport.authenticate("discord", { failureRedirect: FAILURE }),
   (req, res) => {
-    res.redirect(HERMES_URL);
+    const user = req.user as any;
+    if (user.isFirstLogin) {
+      res.redirect(`${HERMES_URL}/Username`);
+    } else {
+      res.redirect(HERMES_URL);
+    }
   }
 );
 
 router.get(
-  "/auth/github",
+  "/github",
   passport.authenticate("github", { scope: ["user:email"] })
 );
 
 router.get(
-  "/auth/github/callback",
+  "/github/callback",
   passport.authenticate("github", { failureRedirect: FAILURE }),
   (req, res) => {
-    res.redirect(HERMES_URL);
+    const user = req.user as any;
+    if (user.isFirstLogin) {
+      res.redirect(`${HERMES_URL}/Username`);
+    } else {
+      res.redirect(HERMES_URL);
+    }
   }
 );
 
-router.get("/auth/status", (req, res) => {
+router.get("/status", (req, res) => {
   if (req.isAuthenticated()) {
     res.json({ isAuthenticated: true, user: req.user });
   } else {

@@ -10,8 +10,6 @@ import path = require("path");
 import { isAuthenticated } from "./middleware/auth.middleware";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
-console.log(process.env.AUTH_DISCORD_CLIENT!);
-console.log(process.env.AUTH_DISCORD_SECRET!);
 
 const app = express();
 

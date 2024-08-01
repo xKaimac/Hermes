@@ -11,6 +11,7 @@ export const createUsersTable = async () => {
       google_id VARCHAR(255) UNIQUE,
       discord_id VARCHAR(255) UNIQUE,
       github_id VARCHAR(255) UNIQUE,
+      first_login BOOLEAN DEFAULT TRUE,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     )
   `;
