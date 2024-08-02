@@ -30,17 +30,9 @@ const LoginButton = ({ name, ...props }: Provider) => {
   const color = getIcon().color;
 
   return (
-    <div {...props}>
-      <Button
-        component="a"
-        href={getAuthURL()}
-        variant="subtle"
-        color="rgba(0, 0, 0, 1)"
-        size="xl"
-      >
-        <Icon color={color} size="100%" />
-      </Button>
-    </div>
+    <a className="flex justify-center">
+      <Icon color={color} size="50%" />
+    </a>
   );
 };
 

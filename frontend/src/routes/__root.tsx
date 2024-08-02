@@ -5,11 +5,11 @@ export const Route = createRootRoute({
   component: () => {
     const location = useLocation();
     const isLoginPage = location.pathname === "/login";
-    console.log(location);
+    const isUsernamePage = location.pathname === "/Username";
 
     return (
       <>
-        {!isLoginPage && <NavBar />}
+        {!isLoginPage && !isUsernamePage && <NavBar />}
         <Outlet />
       </>
     );

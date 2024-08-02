@@ -12,7 +12,13 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <MantineProvider defaultColorScheme="light">
+    <MantineProvider
+      defaultColorScheme="light"
+      theme={{
+        fontFamily: "Dosis, sans-serif",
+        headings: { fontFamily: "Dosis, sans-serif" },
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>

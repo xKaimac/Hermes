@@ -4,6 +4,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["Dosis", "sans-serif"],
+      },
       colors: {
         primary: {
           DEFAULT: "#4B0082",
