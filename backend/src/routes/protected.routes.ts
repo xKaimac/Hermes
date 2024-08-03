@@ -3,6 +3,7 @@ import { isAuthenticated } from "../middleware/auth.middleware";
 import updateUsername from "../services/username.service";
 import uploadProfilePicture from "../config/cloudinary.config";
 import updateProfilePicture from "../services/profilePicture.service";
+import updateStatusText from "../services/statusText.service";
 
 const router = express.Router();
 
@@ -37,6 +38,23 @@ router.post(
       res.status(200).json({ message: "Upload successful", result });
     } catch (error) {
       res.status(500).send("Error uploading file");
+    }
+  }
+);
+
+router.post(
+  "/update-status-text",
+  upload.none(),
+  isAuthenticated,
+  async (req, res) => {
+    try {
+      const { userStatus } = req.body;
+      const result: any = await updateStatusText(req.body, userStatus);
+      return res
+        .status(200)
+        .json({ message: "Status change successful", result });
+    } catch (error) {
+      res.status(500).send("Error updating status");
     }
   }
 );

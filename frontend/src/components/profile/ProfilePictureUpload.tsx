@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { Button, Avatar } from "@mantine/core";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useUser } from "../../utils/UserContext";
-
-interface ProfilePictureUploadProps {
-  currentPicture: string;
-  userEmail: string;
-}
 
 interface UploadData {
   file: File;
@@ -32,14 +27,12 @@ const uploadProfilePicture = async ({ file, email }: UploadData) => {
   return response.json();
 };
 
-const ProfilePictureUpload = ({
-  currentPicture,
-  userEmail,
-}: ProfilePictureUploadProps) => {
+const ProfilePictureUpload = () => {
   const { userData, updateUserData } = useUser();
   const [file, setFile] = useState(null);
 
-  const queryClient = useQueryClient();
+  const userEmail = userData.user.email;
+  const currentPicture = userData.user.profile_picture;
 
   const mutation = useMutation({
     mutationFn: uploadProfilePicture,
@@ -73,7 +66,12 @@ const ProfilePictureUpload = ({
       {!file && (
         <div className="pt-5">
           <label htmlFor="profile-picture-input">
-            <Button component="span">Select New Picture</Button>
+            <Button
+              component="span"
+              className="bg-primary hover:bg-primary-light dark:bg-primary-dark dark:hover:bg-primary text-text-dark-primary"
+            >
+              Select New Picture
+            </Button>
           </label>
         </div>
       )}

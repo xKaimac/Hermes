@@ -1,6 +1,6 @@
 import "./chat-menu/customScrollbar.css";
 import { useUser } from "../../utils/UserContext";
-import { Avatar } from "@mantine/core";
+import { Avatar, TextInput } from "@mantine/core";
 
 const ChatMenu = () => {
   const { userData, isLoading, error } = useUser();
@@ -32,7 +32,12 @@ const ChatMenu = () => {
         <h1 className="text-3xl">Chats</h1>
         <a className="text-3xl">+</a>
       </div>
-      <input className="mt-2 mb-2 p-2" type="text" placeholder="Search" />
+      <TextInput
+        className="mt-2 mb-2 pt-1"
+        radius="xl"
+        type="text"
+        placeholder="Search"
+      />
       <ul className="flex-grow overflow-y-auto">
         {chatItems.map((chat) => (
           <li key={chat.id} className="flex flex-row mt-2 mb-2">
@@ -46,7 +51,7 @@ const ChatMenu = () => {
       </ul>
       <div className="border-t mt-auto pt-2">
         <a href="profile">
-          <Avatar src={userData.user.profile_picture} />
+          <Avatar size="lg" src={userData.user.profile_picture} />
         </a>
       </div>
     </div>

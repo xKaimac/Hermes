@@ -1,21 +1,19 @@
 import { useUser } from "../utils/UserContext";
 import { Avatar, Button, Textarea, TextInput } from "@mantine/core";
 import ProfilePictureUpload from "../components/profile/ProfilePictureUpload";
+import StatusText from "../components/profile/StatusText";
 
 const Profile = () => {
   const { userData, isLoading, error } = useUser();
 
-  // Handle loading state
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  // Handle error state
   if (error) {
     return <div>Error: {error.message}</div>;
   }
 
-  // Handle case where userData is undefined or user is not authenticated
   if (!userData || !userData.isAuthenticated) {
     return <div>Please log in to view chats</div>;
   }
@@ -29,20 +27,8 @@ const Profile = () => {
           <h1 className="text-3xl">Profile</h1>
         </div>
         <div className="flex flex-col items-center justify-center pt-5">
-          <ProfilePictureUpload
-            currentPicture={userData.user.profile_picture}
-            userEmail={userData.user.email}
-          />
-          <div className="w-1/2 pt-5">
-            <Textarea
-              radius="xl"
-              maxLength={255}
-              autosize
-              minRows={1}
-              maxRows={8}
-              defaultValue={userData.user.status_text}
-            />
-          </div>
+          <ProfilePictureUpload />
+          <StatusText />
         </div>
       </div>
     </div>
