@@ -7,7 +7,7 @@ const updateUsername = async (body: any): Promise<boolean> => {
   try {
     await client.query("BEGIN;");
     const { rows } = await client.query(
-      "SELECT username from users WHERE username = $1",
+      "SELECT username from users WHERE UPPER(username) LIKE UPPER($1)",
       [username]
     );
     if (rows.length === 0) {

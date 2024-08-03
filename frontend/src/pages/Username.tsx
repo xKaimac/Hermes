@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button, TextInput } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import BackgroundWithAnimation from "../components/layouts/BackgroundAnimation";
 
 const Username = () => {
   const [username, setUsername] = useState("");
@@ -75,30 +76,34 @@ const Username = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background-light dark:bg-background-dark transition-colors duration-200">
-      <div className="text-center bg-surface-light dark:bg-surface-dark p-8 rounded-lg shadow-lg w-4/5 md:w-1/2 transition-colors duration-200">
-        <h1 className="text-2xl font-bold mb-4 text-text-light-primary dark:text-text-dark-primary">
-          It looks like you're new here!
-        </h1>
-        <p className="text-lg mb-6 text-text-light-secondary dark:text-text-dark-secondary">
-          What should we know you by?
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <TextInput
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter new username"
-            required
-          />
-          {error && <p className="text-red-500 dark:text-red-400">{error}</p>}
-          <Button
-            type="submit"
-            loading={updateUsername.isPending}
-            fullWidth
-            className="bg-primary hover:bg-primary-light dark:bg-primary-dark dark:hover:bg-primary text-text-dark-primary"
-          >
-            Let's go!
-          </Button>
-        </form>
+      <BackgroundWithAnimation />
+
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
+        <div className="text-center bg-surface-light dark:bg-surface-dark p-8 rounded-lg shadow-lg w-4/5 md:w-1/2 transition-colors duration-200">
+          <h1 className="text-2xl font-bold mb-4 text-text-light-primary dark:text-text-dark-primary">
+            It looks like you're new here!
+          </h1>
+          <p className="text-lg mb-6 text-text-light-secondary dark:text-text-dark-secondary">
+            What should we know you by?
+          </p>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <TextInput
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter new username"
+              required
+            />
+            {error && <p className="text-red-500 dark:text-red-400">{error}</p>}
+            <Button
+              type="submit"
+              loading={updateUsername.isPending}
+              fullWidth
+              className="bg-primary hover:bg-primary-light dark:bg-primary-dark dark:hover:bg-primary text-text-dark-primary"
+            >
+              Let's go!
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );
