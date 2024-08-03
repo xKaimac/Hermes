@@ -1,17 +1,20 @@
 import { Outlet, createRootRoute, useLocation } from "@tanstack/react-router";
-import { NavBar } from "../components/navigation/navbar";
+import AppLayout from "../components/layouts/AppLayout";
 
 export const Route = createRootRoute({
   component: () => {
     const location = useLocation();
-    const isLoginPage = location.pathname.toLowerCase() == "/login";
+    const isLoginPage = location.pathname.toLowerCase() === "/login";
     const isUsernamePage = location.pathname.toLowerCase() === "/username";
 
+    if (isLoginPage || isUsernamePage) {
+      return <Outlet />;
+    }
+
     return (
-      <>
-        {!isLoginPage && !isUsernamePage && <NavBar />}
+      <AppLayout>
         <Outlet />
-      </>
+      </AppLayout>
     );
   },
 });

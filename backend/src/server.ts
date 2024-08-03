@@ -9,6 +9,7 @@ import bodyParser from "body-parser";
 import publicRoutes from "./routes/public.routes";
 import { isAuthenticated } from "./middleware/auth.middleware";
 import { configurePassport } from "./config/passport.config";
+import createAllTables from "./models/user.model";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
@@ -63,6 +64,8 @@ app.use((req, res, next) => {
   }
   isAuthenticated(req, res, next);
 });
+
+createAllTables();
 
 app.use(routes);
 
