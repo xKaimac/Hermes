@@ -16,7 +16,7 @@ const Chat = () => {
         <div className="flex flex-row justify-between items-center">
           <h1 className="text-3xl">Chat Name</h1>
           <button onClick={toggleSettings} className="text-3xl">
-            Settings
+            ...
           </button>
         </div>
         <div className="mt-auto pt-2"></div>
