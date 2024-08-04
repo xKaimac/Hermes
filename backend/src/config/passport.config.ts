@@ -26,7 +26,7 @@ export const configurePassport = (config: PassportConfig) => {
         clientID: config.google.clientID,
         clientSecret: config.google.clientSecret,
         callbackURL: config.google.callbackURL,
-        scope: config.google.scope || ["profile", "email"],
+        scope: config.google.scope || ["profile"],
       },
       async (
         accessToken: string,
@@ -54,7 +54,7 @@ export const configurePassport = (config: PassportConfig) => {
         clientID: config.discord.clientID,
         clientSecret: config.discord.clientSecret,
         callbackURL: config.discord.callbackURL,
-        scope: config.discord.scope || ["identify", "email"],
+        scope: config.discord.scope || ["identify"],
       },
       async (
         accessToken: string,
@@ -82,7 +82,7 @@ export const configurePassport = (config: PassportConfig) => {
         clientID: config.github.clientID,
         clientSecret: config.github.clientSecret,
         callbackURL: config.github.callbackURL,
-        scope: config.github.scope || ["user:email"],
+        scope: config.github.scope || ["read:user"],
       },
       async (
         accessToken: string,

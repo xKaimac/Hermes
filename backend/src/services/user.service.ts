@@ -1,5 +1,15 @@
 import pool from "../config/db.config";
 
+const getProfilePicture = (profile: any) => {
+  if (profile.photos && profile.photos.length > 0) {
+    return profile.photos[0].value;
+  }
+  if (profile.id && profile.avatar) {
+    return `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`;
+  }
+  return null; // Default to null if no picture is available
+};
+
 const findOrCreateUser = async (provider: string, profile: any) => {
   const client = await pool.connect();
   try {
@@ -11,14 +21,15 @@ const findOrCreateUser = async (provider: string, profile: any) => {
     );
     let user;
     let isFirstLogin = false;
+    const statusType = "online";
 
     if (rows.length > 0) {
       // User exists, update the provider ID if it's not set
       user = rows[0];
       if (!user[providerId]) {
         await client.query(
-          `UPDATE users SET ${providerId} = $1, first_login = false WHERE id = $2`,
-          [profile.id, user.id]
+          `UPDATE users SET ${providerId} = $1, first_login = $2, status_type = $3 WHERE id = $4`,
+          [profile.id, isFirstLogin, statusType, user.id]
         );
       } else {
         // User exists and provider ID is set, just update first_login
@@ -28,27 +39,27 @@ const findOrCreateUser = async (provider: string, profile: any) => {
         );
       }
     } else {
+      isFirstLogin = true;
       // No user found, create a new one
       const newUser = {
         username: profile.displayName || profile.username,
-        email: profile.email || (profile.emails && profile.emails[0].value),
         [providerId]: profile.id,
-        status_type: "online",
-        first_login: true,
+        status_type: statusType,
+        first_login: isFirstLogin,
+        profile_picture: getProfilePicture(profile),
       };
       const { rows: newRows } = await client.query(
-        `INSERT INTO users (username, email, ${providerId}, status_type, first_login) 
+        `INSERT INTO users (username, ${providerId}, status_type, first_login, profile_picture) 
          VALUES ($1, $2, $3, $4, $5) RETURNING *`,
         [
           newUser.username,
-          newUser.email,
           newUser[providerId],
           newUser.status_type,
           newUser.first_login,
+          newUser.profile_picture,
         ]
       );
       user = newRows[0];
-      isFirstLogin = true;
     }
     await client.query("COMMIT");
     return { user, isFirstLogin };

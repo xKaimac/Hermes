@@ -5,7 +5,6 @@ const createUsersTable = async () => {
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       username VARCHAR(255) UNIQUE,
-      email VARCHAR(255) UNIQUE,
       status_text TEXT,
       status_type VARCHAR(50) CHECK (status_type IN ('offline', 'online', 'busy')),
       google_id VARCHAR(255) UNIQUE,

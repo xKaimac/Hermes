@@ -28,6 +28,7 @@
     "@types/passport-strategy": "^0.2.38",
     "@types/pg": "^8.11.6",
     "@types/react-router-dom": "^5.3.3",
+    "@types/socket.io": "^3.0.1",
     "cloudinary": "^2.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -41,6 +42,7 @@
     "passport-google-oidc": "^0.1.0",
     "pg": "^8.12.0",
     "react-router-dom": "^6.25.1",
+    "socket.io": "^4.7.5",
     "ts-node": "^10.9.2"
   }
 }

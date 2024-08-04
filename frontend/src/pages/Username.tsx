@@ -37,7 +37,7 @@ const Username = () => {
           },
           body: JSON.stringify({
             username: newUsername,
-            email: userData.user.email,
+            userId: userData.user.id,
           }),
           credentials: "include",
         }
@@ -59,8 +59,8 @@ const Username = () => {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = (error: React.FormEvent<HTMLFormElement>) => {
+    error.preventDefault();
     setError("");
     updateUsername.mutate(username);
   };
@@ -79,7 +79,7 @@ const Username = () => {
       <BackgroundWithAnimation />
 
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
-        <div className="text-center bg-surface-light dark:bg-surface-dark p-8 rounded-lg shadow-lg w-4/5 md:w-1/2 transition-colors duration-200">
+        <div className="text-center bg-surface-light dark:bg-surface-dark p-8 rounded-xl shadow-lg w-4/5 md:w-1/2 transition-colors duration-200">
           <h1 className="text-2xl font-bold mb-4 text-text-light-primary dark:text-text-dark-primary">
             It looks like you're new here!
           </h1>

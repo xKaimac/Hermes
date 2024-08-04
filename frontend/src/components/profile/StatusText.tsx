@@ -5,19 +5,19 @@ import { useMutation } from "@tanstack/react-query";
 
 interface UploadData {
   userStatus: string;
-  email: string;
+  userId: string;
 }
 
 const StatusText = () => {
   const { userData, updateUserData } = useUser();
 
-  const userEmail = userData.user.email;
+  const userId = userData.user.id;
   let userStatus = userData.user.status_text;
 
-  const updateStatusText = async ({ userStatus, email }: UploadData) => {
+  const updateStatusText = async ({ userStatus, userId }: UploadData) => {
     const formData = new FormData();
     formData.append("userStatus", userStatus);
-    formData.append("email", email);
+    formData.append("userId", userId);
 
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/user/update-status-text`,
@@ -41,7 +41,7 @@ const StatusText = () => {
   });
 
   const handleClick = () => {
-    mutation.mutate({ userStatus, email: userEmail });
+    mutation.mutate({ userStatus, userId: userId });
   };
 
   const handleOnChange = (event: any) => {
@@ -57,7 +57,7 @@ const StatusText = () => {
   };
 
   return (
-    <div className="w-1/2 pt-5">
+    <div className="w-3/4 lg:w-1/2 xl:w-1/3 pt-5">
       <Textarea
         radius="xl"
         maxLength={255}

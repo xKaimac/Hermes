@@ -1,20 +1,22 @@
 import pool from "../config/db.config";
 
-const updateStatusText = async (
+const acceptFriendRequest = async (
   userId: string,
-  statusText: string
+  friendId: string
 ): Promise<boolean> => {
   const client = await pool.connect();
   let success: boolean = false;
+  const accepted = "accepted";
+
   try {
     await client.query("BEGIN;");
-    await client.query("UPDATE users SET status_text = $1 WHERE id = $2", [
-      statusText,
-      userId,
-    ]);
+    await client.query(
+      "UPDATE friends SET status = $3 WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)",
+      [userId, friendId, accepted]
+    );
     await client.query("COMMIT");
     success = true;
-  } catch (e) {
+  } catch (error) {
     await client.query("ROLLBACK");
     success = false;
   } finally {
@@ -23,4 +25,4 @@ const updateStatusText = async (
   return success;
 };
 
-export default updateStatusText;
+export default acceptFriendRequest;
