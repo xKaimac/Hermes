@@ -1,4 +1,5 @@
 import pool from "../config/db.config";
+import handleFriendRequest from "./handleFriendRequest.service";
 
 const getFriendId = async (friendName: string) => {
   const client = await pool.connect();
@@ -36,10 +37,7 @@ const getRequestStatus = async (userId: string, friendId: string) => {
     if (rows.length > 0) {
       requestStatus = rows[0].status;
       if (requestStatus === "pending") {
-        await client.query(
-          "UPDATE friends SET status = $1 WHERE (user_id = $2 AND friend_id = $3) OR (user_id = $3 AND friend_id = $2)",
-          [accepted, userId, friendId]
-        );
+        await handleFriendRequest(accepted, userId, friendId);
         requestStatus = accepted;
       }
     }

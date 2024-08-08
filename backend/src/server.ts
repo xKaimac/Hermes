@@ -33,14 +33,11 @@ interface SocketData {
 const userSocketMap = new Map<string, string>();
 
 io.on("connection", (socket: Socket) => {
-  console.log("A user connected");
-
   socket.on("authenticate", (data: SocketData) => {
     userSocketMap.set(data.userId, socket.id);
   });
 
   socket.on("disconnect", () => {
-    console.log("User disconnected");
     for (const [userId, socketId] of userSocketMap.entries()) {
       if (socketId === socket.id) {
         userSocketMap.delete(userId);

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ScrollArea, Avatar } from "@mantine/core";
+import { ScrollArea, Avatar, Button } from "@mantine/core";
 import AddFriend from "./AddFriend";
 import { useUser } from "../../utils/UserContext";
 import { FaCheck } from "react-icons/fa";
@@ -80,7 +80,7 @@ const FriendsList: React.FC = () => {
   }, [userId, queryClient, userData.user.id]);
 
   const handleFriendAction = async (
-    actionType: "accept" | "reject" | "block",
+    actionType: "accepted" | "reject" | "block",
     friendId: string
   ) => {
     try {
@@ -92,9 +92,9 @@ const FriendsList: React.FC = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            action: actionType,
             userId: userData.user.id,
             friendId: friendId,
-            action: actionType,
           }),
           credentials: "include",
         }
@@ -112,7 +112,7 @@ const FriendsList: React.FC = () => {
 
   const renderFriendList = (
     friendList: Friend[],
-    type: "confirmed" | "outgoing" | "incoming"
+    type: "accepted" | "outgoing" | "incoming"
   ) => (
     <ul className="divide-y divide-text-light-secondary/25 dark:divide-text-light-secondary/75">
       {friendList.map((friend) => (
@@ -131,15 +131,24 @@ const FriendsList: React.FC = () => {
           )}
           {type === "incoming" && (
             <div className="flex flex-row">
-              <a onClick={() => handleFriendAction("accept", friend.id)}>
+              <Button
+                variant="transparent"
+                onClick={() => handleFriendAction("accepted", friend.id)}
+              >
                 <FaCheck color="green" />
-              </a>
-              <a onClick={() => handleFriendAction("reject", friend.id)}>
+              </Button>
+              <Button
+                variant="transparent"
+                onClick={() => handleFriendAction("reject", friend.id)}
+              >
                 <IoClose color="red" />
-              </a>
-              <a onClick={() => handleFriendAction("block", friend.id)}>
+              </Button>
+              <Button
+                variant="transparent"
+                onClick={() => handleFriendAction("block", friend.id)}
+              >
                 <MdBlock color="grey" />
-              </a>
+              </Button>
             </div>
           )}
         </li>
