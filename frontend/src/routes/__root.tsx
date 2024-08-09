@@ -12,9 +12,14 @@ export const Route = createRootRoute({
     const location = useLocation();
     const isLoginPage = location.pathname.toLowerCase() === "/login";
     const isUsernamePage = location.pathname.toLowerCase() === "/username";
-    const { userData } = useUser();
+    const { userData, isLoading } = useUser();
+
+    if (isLoading) {
+      return <div> loading... </div>;
+    }
 
     if (!userData && !isLoginPage) {
+      console.log("leaving........");
       return <Navigate to="/login" />;
     }
 

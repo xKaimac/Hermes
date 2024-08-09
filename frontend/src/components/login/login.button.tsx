@@ -1,7 +1,6 @@
 import { IconType } from "react-icons";
 import { FcGoogle } from "react-icons/fc";
 import { FaDiscord, FaGithub } from "react-icons/fa";
-import { Button } from "@mantine/core";
 
 type Provider = {
   name: string;
