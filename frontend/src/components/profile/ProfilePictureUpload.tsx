@@ -47,6 +47,7 @@ const ProfilePictureUpload = () => {
   return (
     <div className="flex flex-col items-center justify-center pt-5">
       <Avatar className="size-[20vh]" src={currentPicture} />
+      <h1>{userData.user.username}</h1>
       <input
         type="file"
         onChange={handleFileChange}

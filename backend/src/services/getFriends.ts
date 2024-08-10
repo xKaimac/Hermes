@@ -1,12 +1,5 @@
 import pool from "../config/db.config";
-
-interface FriendData {
-  id: string;
-  username: string;
-  status: string;
-  statusText: string;
-  profilePicture: string;
-}
+import { FriendData } from "../../types/FriendData";
 
 interface FriendsResult {
   confirmedFriends: FriendData[];

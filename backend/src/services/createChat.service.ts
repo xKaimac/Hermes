@@ -16,7 +16,7 @@ const createChat = async (
       [chatName]
     );
     await client.query("COMMIT");
-    success = await addChatParticipants(rows[0], participants);
+    success = await addChatParticipants(rows[0].id, participants);
   } catch (error) {
     console.log(error);
     await client.query("ROLLBACK");

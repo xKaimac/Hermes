@@ -1,3 +1,4 @@
+import { FriendData } from "../../types/FriendData";
 import pool from "../config/db.config";
 
 const getProfilePicture = (profile: any) => {
@@ -74,6 +75,21 @@ const findOrCreateUser = async (provider: string, profile: any) => {
 export const findUserById = async (id: string) => {
   const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
   return rows[0];
+};
+
+export const findUserByName = async (name: string): Promise<FriendData> => {
+  const { rows } = await pool.query(
+    "SELECT id, profile_picture FROM users WHERE username = $1",
+    [name]
+  );
+
+  const friendData: FriendData = {
+    id: rows[0].id,
+    username: name,
+    profilePicture: rows[0].profile_picture,
+  };
+
+  return friendData;
 };
 
 export default findOrCreateUser;

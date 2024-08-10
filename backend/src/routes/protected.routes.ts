@@ -12,6 +12,7 @@ import path from "path";
 import handleFriendRequest from "../services/handleFriendRequest.service";
 import createChat from "../services/createChat.service";
 import addChatParticipants from "../services/addChatParticipants.service";
+import findFriend from "../services/findFriend";
 
 const router = express.Router();
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
@@ -116,6 +117,17 @@ router.post("/get-friends", isAuthenticated, async (req, res) => {
   }
 });
 
+router.post("/find-friend", isAuthenticated, async (req, res) => {
+  try {
+    const { userId, friendName } = req.body;
+    const result = await findFriend(userId, friendName);
+    return res.status(200).json({ result: result });
+  } catch (error) {
+    console.error("Error finding friend: ", error);
+    return res.status(500).json({ message: "Error finding friend" });
+  }
+});
+
 router.post("/handle-friend-request", isAuthenticated, async (req, res) => {
   try {
     console.log(req.body);
@@ -134,8 +146,8 @@ router.post("/handle-friend-request", isAuthenticated, async (req, res) => {
 
 router.post("/create-chat", isAuthenticated, async (req, res) => {
   try {
-    const { chatName, participants } = req.body;
-    await createChat(chatName, participants);
+    const { chatName, filteredParticipants } = req.body;
+    await createChat(chatName, filteredParticipants);
     return res.status(200).json({ message: "Chat created successfully" });
   } catch (error) {
     console.log(error);

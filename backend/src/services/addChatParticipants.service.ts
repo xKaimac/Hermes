@@ -2,13 +2,16 @@ import pool from "../config/db.config";
 import { ChatParticipants } from "../../types/ChatParticipants";
 
 const addChatParticipants = async (
-  chatId: string,
+  chatId: number,
   participants: Array<ChatParticipants>
 ): Promise<boolean> => {
   const client = await pool.connect();
   let success: boolean = false;
 
+  console.log("chatId: " + chatId);
+
   for (let participant of participants) {
+    console.log(participant);
     try {
       const { userId, role } = participant;
       await client.query("BEGIN");
@@ -16,9 +19,12 @@ const addChatParticipants = async (
         "INSERT INTO chat_participants(chat_id, user_id, role) VALUES($1, $2, $3)",
         [chatId, userId, role]
       );
+      await client.query("COMMIT");
     } catch (error) {
       console.log(error);
       success = false;
+    } finally {
+      client.release();
     }
   }
 

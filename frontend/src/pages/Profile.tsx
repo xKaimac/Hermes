@@ -51,7 +51,7 @@ const Profile = () => {
   return (
     <div className="flex flex-col w-full h-[calc(100vh-2.5rem)] bg-background-light dark:bg-background-dark rounded-xl mb-5 mt-5 mr-5 p-5 overflow-hidden transition-all duration-300">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl text-text-primary-light dark:text-text-primary-dark">
+        <h1 className="text-3xl text-text-light-primary dark:text-text-dark-primary">
           {userData.user.username}
         </h1>
         <button onClick={logout}>
