@@ -49,7 +49,6 @@ const createChatsTable = async () => {
   CREATE TABLE IF NOT EXISTS chats (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255),
-    type VARCHAR(50) CHECK (type IN ('direct', 'group')),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
   );
   `;
@@ -68,6 +67,7 @@ const createChatParticipantsTable = async () => {
     id SERIAL PRIMARY KEY,
     chat_id INTEGER REFERENCES chats(id),
     user_id INTEGER REFERENCES users(id),
+    role TEXT CHECK (role IN ('regular', 'admin')) DEFAULT 'user',
     joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(chat_id, user_id)
   );

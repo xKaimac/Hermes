@@ -10,6 +10,8 @@ import { Server } from "socket.io";
 import dotenv from "dotenv";
 import path from "path";
 import handleFriendRequest from "../services/handleFriendRequest.service";
+import createChat from "../services/createChat.service";
+import addChatParticipants from "../services/addChatParticipants.service";
 
 const router = express.Router();
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
@@ -125,8 +127,34 @@ router.post("/handle-friend-request", isAuthenticated, async (req, res) => {
     });
   } catch (error) {
     return res
-      .status(400)
+      .status(500)
       .json({ message: `Failed to handle friend request`, error: error });
+  }
+});
+
+router.post("/create-chat", isAuthenticated, async (req, res) => {
+  try {
+    const { chatName, participants } = req.body;
+    await createChat(chatName, participants);
+    return res.status(200).json({ message: "Chat created successfully" });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: "Failed to create chat", error: error });
+  }
+});
+
+router.post("/add-chat-participants", isAuthenticated, async (req, res) => {
+  try {
+    const { chatId, participants } = req.body;
+    await addChatParticipants(chatId, participants);
+    return res
+      .status(200)
+      .json({ message: "Chat participants added successfully" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Failed to add chat participants" });
   }
 });
 

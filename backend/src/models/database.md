@@ -4,11 +4,11 @@
 
 This covers the creation and structure of the following tables:
 
-- Users
-- Friends
-- Chats
-- Chat Participants
-- Messages
+-   Users
+-   Friends
+-   Chats
+-   Chat Participants
+-   Messages
 
 Each section includes the SQL schema, explanation of each field, and relationships between the tables.
 
@@ -17,6 +17,7 @@ Each section includes the SQL schema, explanation of each field, and relationshi
 ### Users Table
 
 #### Schema Definition
+
 ```sql
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
@@ -34,20 +35,21 @@ CREATE TABLE IF NOT EXISTS users (
 
 #### Fields
 
-- **id**: Unique identifier for each user (Primary Key).
-- **username**: Unique username for the user.
-- **status_text**: Text status set by the user.
-- **status_type**: Status type, limited to 'offline', 'online', or 'busy'.
-- **google_id**: Unique identifier for Google authentication.
-- **discord_id**: Unique identifier for Discord authentication.
-- **github_id**: Unique identifier for GitHub authentication.
-- **first_login**: Boolean indicating if it's the user's first login (default is TRUE).
-- **created_at**: Timestamp indicating when the user was created.
-- **profile_picture**: URL to the user's profile picture.
+-   **id**: Unique identifier for each user (Primary Key).
+-   **username**: Unique username for the user.
+-   **status_text**: Text status set by the user.
+-   **status_type**: Status type, limited to 'offline', 'online', or 'busy'.
+-   **google_id**: Unique identifier for Google authentication.
+-   **discord_id**: Unique identifier for Discord authentication.
+-   **github_id**: Unique identifier for GitHub authentication.
+-   **first_login**: Boolean indicating if it's the user's first login (default is TRUE).
+-   **created_at**: Timestamp indicating when the user was created.
+-   **profile_picture**: URL to the user's profile picture.
 
 ### Friends Table
 
 #### Schema Definition
+
 ```sql
 CREATE TABLE IF NOT EXISTS friends (
   id SERIAL PRIMARY KEY,
@@ -61,39 +63,40 @@ CREATE TABLE IF NOT EXISTS friends (
 
 #### Fields
 
-- **id**: Unique identifier for each friendship (Primary Key).
-- **user_id**: User ID of the person who initiated the friendship (Foreign Key referencing `users.id`).
-- **friend_id**: User ID of the friend (Foreign Key referencing `users.id`).
-- **status**: Status of the friendship, limited to 'pending', 'accepted', or 'blocked'.
-- **created_at**: Timestamp indicating when the friendship was created.
+-   **id**: Unique identifier for each friendship (Primary Key).
+-   **user_id**: User ID of the person who initiated the friendship (Foreign Key referencing `users.id`).
+-   **friend_id**: User ID of the friend (Foreign Key referencing `users.id`).
+-   **status**: Status of the friendship, limited to 'pending', 'accepted', or 'blocked'.
+-   **created_at**: Timestamp indicating when the friendship was created.
 
 ### Chats Table
 
 #### Schema Definition
+
 ```sql
 CREATE TABLE IF NOT EXISTS chats (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255),
-  type VARCHAR(50) CHECK (type IN ('direct', 'group')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
 #### Fields
 
-- **id**: Unique identifier for each chat (Primary Key).
-- **name**: Name of the chat.
-- **type**: Type of the chat, limited to 'direct' or 'group'.
-- **created_at**: Timestamp indicating when the chat was created.
+-   **id**: Unique identifier for each chat (Primary Key).
+-   **name**: Name of the chat.
+-   **created_at**: Timestamp indicating when the chat was created.
 
 ### Chat Participants Table
 
 #### Schema Definition
+
 ```sql
 CREATE TABLE IF NOT EXISTS chat_participants (
   id SERIAL PRIMARY KEY,
   chat_id INTEGER REFERENCES chats(id),
   user_id INTEGER REFERENCES users(id),
+  role TEXT CHECK (role IN ('regular', 'admin')) DEFAULT 'user',
   joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(chat_id, user_id)
 );
@@ -101,14 +104,16 @@ CREATE TABLE IF NOT EXISTS chat_participants (
 
 #### Fields
 
-- **id**: Unique identifier for each chat participant (Primary Key).
-- **chat_id**: Chat ID that the user is participating in (Foreign Key referencing `chats.id`).
-- **user_id**: User ID of the participant (Foreign Key referencing `users.id`).
-- **joined_at**: Timestamp indicating when the user joined the chat.
+-   **id**: Unique identifier for each chat participant (Primary Key).
+-   **chat_id**: Chat ID that the user is participating in (Foreign Key referencing `chats.id`).
+-   **user_id**: User ID of the participant (Foreign Key referencing `users.id`).
+-   **role**: The role that the user plays in the chat (Must be `regular` or `admin`).
+-   **joined_at**: Timestamp indicating when the user joined the chat.
 
 ### Messages Table
 
 #### Schema Definition
+
 ```sql
 CREATE TABLE IF NOT EXISTS messages (
   id SERIAL PRIMARY KEY,
@@ -121,17 +126,17 @@ CREATE TABLE IF NOT EXISTS messages (
 
 #### Fields
 
-- **id**: Unique identifier for each message (Primary Key).
-- **chat_id**: Chat ID that the message belongs to (Foreign Key referencing `chats.id`).
-- **sender_id**: User ID of the sender (Foreign Key referencing `users.id`).
-- **content**: Content of the message.
-- **created_at**: Timestamp indicating when the message was created.
+-   **id**: Unique identifier for each message (Primary Key).
+-   **chat_id**: Chat ID that the message belongs to (Foreign Key referencing `chats.id`).
+-   **sender_id**: User ID of the sender (Foreign Key referencing `users.id`).
+-   **content**: Content of the message.
+-   **created_at**: Timestamp indicating when the message was created.
 
 ## Relationships
 
-- **Users and Friends**: Each user can have multiple friends, and each friendship has a status.
-- **Chats and Chat Participants**: Each chat can have multiple participants, and each participant is linked to a chat and a user.
-- **Chats and Messages**: Each chat can have multiple messages, and each message is linked to a chat and a sender (user).
+-   **Users and Friends**: Each user can have multiple friends, and each friendship has a status.
+-   **Chats and Chat Participants**: Each chat can have multiple participants, and each participant is linked to a chat and a user.
+-   **Chats and Messages**: Each chat can have multiple messages, and each message is linked to a chat and a sender (user).
 
 ## Initialization
 
@@ -142,18 +147,28 @@ To create all the tables, execute the `createAllTables` function:
 ```typescript
 import pool from "../config/db.config";
 
-const createUsersTable = async () => { /* ... */ };
-const createFriendsTable = async () => { /* ... */ };
-const createChatsTable = async () => { /* ... */ };
-const createChatParticipantsTable = async () => { /* ... */ };
-const createMessagesTable = async () => { /* ... */ };
+const createUsersTable = async () => {
+    /* ... */
+};
+const createFriendsTable = async () => {
+    /* ... */
+};
+const createChatsTable = async () => {
+    /* ... */
+};
+const createChatParticipantsTable = async () => {
+    /* ... */
+};
+const createMessagesTable = async () => {
+    /* ... */
+};
 
 const createAllTables = () => {
-  createUsersTable();
-  createFriendsTable();
-  createChatsTable();
-  createChatParticipantsTable();
-  createMessagesTable();
+    createUsersTable();
+    createFriendsTable();
+    createChatsTable();
+    createChatParticipantsTable();
+    createMessagesTable();
 };
 
 export default createAllTables;
@@ -161,11 +176,11 @@ export default createAllTables;
 
 ### Usage
 
-- **Run the Initialization**:
-  Call the `createAllTables` function when setting up your application to ensure all tables are created:
+-   **Run the Initialization**:
+    Call the `createAllTables` function when setting up your application to ensure all tables are created:
 
-  ```typescript
-  import createAllTables from "./path/to/this/file";
+    ```typescript
+    import createAllTables from "./path/to/this/file";
 
-  createAllTables();
-  ```
+    createAllTables();
+    ```
