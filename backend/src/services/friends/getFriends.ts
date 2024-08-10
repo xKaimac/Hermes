@@ -1,5 +1,5 @@
-import pool from "../config/db.config";
-import { FriendData } from "../../types/FriendData";
+import pool from "../../config/db.config";
+import { FriendData } from "../../../types/FriendData";
 
 interface FriendsResult {
   confirmedFriends: FriendData[];

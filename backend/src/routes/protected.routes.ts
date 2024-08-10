@@ -1,23 +1,21 @@
 import express from "express";
 import { isAuthenticated } from "../middleware/auth.middleware";
-import updateUsername from "../services/username.service";
+import updateUsername from "../services/user/username.service";
 import uploadProfilePicture from "../config/cloudinary.config";
-import updateProfilePicture from "../services/profilePicture.service";
-import updateStatusText from "../services/statusText.service";
-import sendFriendRequest from "../services/addFriend.service";
-import getFriends from "../services/getFriends";
+import updateProfilePicture from "../services/user/profilePicture.service";
+import updateStatusText from "../services/user/statusText.service";
+import sendFriendRequest from "../services/friends/addFriend.service";
+import getFriends from "../services/friends/getFriends";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
 import path from "path";
-import handleFriendRequest from "../services/handleFriendRequest.service";
-import createChat from "../services/createChat.service";
-import addChatParticipants from "../services/addChatParticipants.service";
-import findFriend from "../services/findFriend";
+import handleFriendRequest from "../services/friends/handleFriendRequest.service";
+import createChat from "../services/chats/createChat.service";
+import addChatParticipants from "../services/chats/addChatParticipants.service";
+import findFriend from "../services/friends/findFriend";
 
 const router = express.Router();
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
-
-const HERMES_URL = process.env.HERMES_URL;
 
 const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage() });
@@ -138,6 +136,7 @@ router.post("/handle-friend-request", isAuthenticated, async (req, res) => {
       result: result,
     });
   } catch (error) {
+    console.error(error);
     return res
       .status(500)
       .json({ message: `Failed to handle friend request`, error: error });
@@ -150,7 +149,7 @@ router.post("/create-chat", isAuthenticated, async (req, res) => {
     await createChat(chatName, filteredParticipants);
     return res.status(200).json({ message: "Chat created successfully" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res
       .status(500)
       .json({ message: "Failed to create chat", error: error });
@@ -165,8 +164,19 @@ router.post("/add-chat-participants", isAuthenticated, async (req, res) => {
       .status(200)
       .json({ message: "Chat participants added successfully" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ message: "Failed to add chat participants" });
+  }
+});
+
+router.get("/get-chats", isAuthenticated, async (req, res) => {
+  try {
+    const { userId } = req.body;
+    await getChats(userId);
+    return res.status(200).json({ message: "Chats retrieved successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to retrieve chats" });
   }
 });
 

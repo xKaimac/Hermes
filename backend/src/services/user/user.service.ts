@@ -1,5 +1,5 @@
-import { FriendData } from "../../types/FriendData";
-import pool from "../config/db.config";
+import { FriendData } from "../../../types/FriendData";
+import pool from "../../config/db.config";
 
 const getProfilePicture = (profile: any) => {
   if (profile.photos && profile.photos.length > 0) {

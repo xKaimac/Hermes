@@ -1,4 +1,4 @@
-import pool from "../config/db.config";
+import pool from "../../config/db.config";
 import handleFriendRequest from "./handleFriendRequest.service";
 
 const getFriendId = async (friendName: string) => {

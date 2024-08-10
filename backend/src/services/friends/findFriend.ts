@@ -1,6 +1,6 @@
-import pool from "../config/db.config";
-import { findUserByName } from "./user.service";
-import { FriendData } from "../../types/FriendData";
+import pool from "../../config/db.config";
+import { findUserByName } from "../user/user.service";
+import { FriendData } from "../../../types/FriendData";
 
 interface Result {
   friendData: FriendData | undefined;

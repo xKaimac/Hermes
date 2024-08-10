@@ -2,7 +2,7 @@ import cors from "cors";
 import http from "http";
 import dotenv from "dotenv";
 import path from "path";
-import express, { Request, Response } from "express";
+import express from "express";
 import passport from "passport";
 import routes from "./routes/index";
 import bodyParser from "body-parser";

@@ -1,5 +1,5 @@
-import pool from "../config/db.config";
-import { ChatParticipants } from "../../types/ChatParticipants";
+import pool from "../../config/db.config";
+import { ChatParticipants } from "../../../types/ChatParticipants";
 import addChatParticipants from "./addChatParticipants.service";
 
 const createChat = async (
