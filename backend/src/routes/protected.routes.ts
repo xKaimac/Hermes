@@ -55,22 +55,17 @@ router.post(
   }
 );
 
-router.post(
-  "/update-status-text",
-  upload.none(),
-  isAuthenticated,
-  async (req, res) => {
-    try {
-      const { userId, userStatus } = req.body;
-      const result: any = await updateStatusText(userId, userStatus);
-      return res
-        .status(200)
-        .json({ message: "Status change successful", result });
-    } catch (error) {
-      res.status(500).send("Error updating status");
-    }
+router.post("/update-status-text", isAuthenticated, async (req, res) => {
+  try {
+    const { userId, userStatus } = req.body;
+    const result: any = await updateStatusText(userId, userStatus);
+    return res
+      .status(200)
+      .json({ message: "Status change successful", result });
+  } catch (error) {
+    res.status(500).send("Error updating status");
   }
-);
+});
 
 router.post("/add-friend", isAuthenticated, async (req, res) => {
   try {

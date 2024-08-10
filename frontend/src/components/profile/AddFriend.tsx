@@ -13,7 +13,6 @@ const addFriend = async ({
   friendName,
   userId,
 }: AddFriendParams): Promise<any> => {
-  console.log("request sent to : " + friendName);
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/user/add-friend`,
     {
@@ -25,7 +24,6 @@ const addFriend = async ({
       credentials: "include",
     }
   );
-  console.log(response);
   if (!response.ok) {
     throw new Error("Sorry, we can't find that user");
   }

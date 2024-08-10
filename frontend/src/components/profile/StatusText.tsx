@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useUser } from "../../utils/UserContext";
 import { Button, Textarea } from "@mantine/core";
 import { FaArrowCircleRight } from "react-icons/fa";
@@ -17,14 +17,14 @@ const StatusText = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const updateStatusText = async ({ userStatus, userId }: UploadData) => {
-    const formData = new FormData();
-    formData.append("userStatus", userStatus);
-    formData.append("userId", userId);
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/user/update-status-text`,
       {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userStatus, userId }),
         credentials: "include",
       }
     );
