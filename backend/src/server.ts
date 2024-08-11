@@ -7,11 +7,12 @@ import passport from "passport";
 import routes from "./routes/index";
 import bodyParser from "body-parser";
 import session from "express-session";
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import createAllTables from "./models/user.model";
 import publicRoutes from "./routes/public.routes";
 import { isAuthenticated } from "./middleware/auth.middleware";
 import { configurePassport } from "./config/passport.config";
+import { initializeSocket } from "./services/socket/socket.service";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
@@ -26,35 +27,18 @@ const io = new Server(server, {
   },
 });
 
-interface SocketData {
-  userId: string;
-}
-
-const userSocketMap = new Map<string, string>();
-
-io.on("connection", (socket: Socket) => {
-  socket.on("authenticate", (data: SocketData) => {
-    userSocketMap.set(data.userId, socket.id);
-  });
-
-  socket.on("disconnect", () => {
-    for (const [userId, socketId] of userSocketMap.entries()) {
-      if (socketId === socket.id) {
-        userSocketMap.delete(userId);
-        break;
-      }
-    }
-  });
-});
+initializeSocket(io);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(
   cors({
     origin: process.env.HERMES_URL,
     credentials: true,
   })
 );
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "",
@@ -62,6 +46,7 @@ app.use(
     saveUninitialized: false,
   })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -94,12 +79,6 @@ app.use((req, res, next) => {
 });
 
 createAllTables();
-
-app.use((req, res, next) => {
-  (req as any).io = io;
-  (req as any).userSocketMap = userSocketMap;
-  next();
-});
 
 app.use(routes);
 

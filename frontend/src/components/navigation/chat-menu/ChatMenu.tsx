@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useUser } from "../../../utils/UserContext";
 import { Avatar, ScrollArea, TextInput } from "@mantine/core";
 import ChatCreation from "./ChatCreation";
+import io from "socket.io-client";
 
 interface Chat {
   chatId: number;
@@ -48,6 +49,18 @@ const ChatMenu = () => {
     };
 
     fetchChats();
+
+    const socket = io(`${import.meta.env.VITE_BACKEND_URL}`);
+
+    socket.emit("authenticate", { userId: userData.user.id });
+
+    socket.on("newChat", (newChat: Chat) => {
+      setChats((prevChats: Array<Chat>) => [...prevChats, newChat]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [userData]);
 
   if (isLoading || isLoadingChats) {

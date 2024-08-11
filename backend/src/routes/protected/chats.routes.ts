@@ -3,13 +3,25 @@ import { isAuthenticated } from "../../middleware/auth.middleware";
 import createChat from "../../services/chats/createChat.service";
 import addChatParticipants from "../../services/chats/addChatParticipants.service";
 import getChats from "../../services/chats/getChats.services";
+import { emitNewChat } from "../../services/socket/socket.service";
 
 const router = express.Router();
 
 router.post("/create-chat", isAuthenticated, async (req, res) => {
   try {
     const { chatName, filteredParticipants } = req.body;
-    await createChat(chatName, filteredParticipants);
+    const newChat = await createChat(chatName, filteredParticipants);
+
+    emitNewChat(
+      newChat.participants.map((participant) => participant.userId),
+      {
+        chatId: newChat.chatId,
+        name: newChat.name,
+        chatPicture: newChat.chatPicture,
+        mostRecentMessage: newChat.mostRecentMessage,
+      }
+    );
+
     return res.status(200).json({ message: "Chat created successfully" });
   } catch (error) {
     console.error(error);
@@ -35,7 +47,6 @@ router.post("/add-chat-participants", isAuthenticated, async (req, res) => {
 router.get("/get-chats", isAuthenticated, async (req, res) => {
   try {
     const { userId } = req.query;
-    console.log("in the api call" + userId);
     const chats = await getChats(userId);
     return res
       .status(200)

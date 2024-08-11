@@ -24,7 +24,6 @@ const handleFriendRequest = async (
   } finally {
     client.release();
   }
-  console.log(success);
   return success;
 };
 

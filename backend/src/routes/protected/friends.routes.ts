@@ -5,27 +5,17 @@ import handleFriendRequest from "../../services/friends/handleFriendRequest.serv
 import findFriend from "../../services/friends/findFriend";
 import express from "express";
 import { isAuthenticated } from "../../middleware/auth.middleware";
+import { emitFriendRequest } from "../../services/socket/socket.service";
 
 const router = express.Router();
 
 router.post("/add-friend", isAuthenticated, async (req, res) => {
   try {
     const { userId, friendName } = req.body;
-    const io: Server = (req as any).io;
-    const userSocketMap: Map<string, string> = (req as any).userSocketMap;
-
     const result = await sendFriendRequest(userId, friendName);
 
     if (result.success) {
-      const friendId = result.friendId;
-      const recipientSocketId = userSocketMap.get(friendId);
-
-      if (recipientSocketId) {
-        io.to(recipientSocketId).emit("friendRequest", {
-          type: "friendRequest",
-          senderId: userId,
-        });
-      }
+      emitFriendRequest(result.friendId, userId);
 
       return res.status(200).json({
         message: "Friend request sent successfully",

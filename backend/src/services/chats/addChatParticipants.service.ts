@@ -8,10 +8,7 @@ const addChatParticipants = async (
   const client = await pool.connect();
   let success: boolean = false;
 
-  console.log("chatId: " + chatId);
-
   for (let participant of participants) {
-    console.log(participant);
     try {
       const { userId, role } = participant;
       await client.query("BEGIN");
@@ -23,10 +20,9 @@ const addChatParticipants = async (
     } catch (error) {
       console.log(error);
       success = false;
-    } finally {
-      client.release();
     }
   }
+  client.release();
 
   return success;
 };

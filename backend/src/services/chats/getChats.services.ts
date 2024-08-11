@@ -1,11 +1,5 @@
 import pool from "../../config/db.config";
-
-interface Chat {
-  chatId: number;
-  name: string;
-  chatPicture?: string;
-  mostRecentMessage?: string;
-}
+import { Chat } from "../../../types/Chat";
 
 interface Result {
   success: boolean;
@@ -29,6 +23,8 @@ const getMostRecentMessage = async (chatId: string): Promise<string> => {
   } catch (error) {
     console.error(error);
     await client.query("ROLLBACK");
+  } finally {
+    client.release();
   }
 
   return result;

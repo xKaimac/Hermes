@@ -1,31 +1,46 @@
 import pool from "../../config/db.config";
 import { ChatParticipants } from "../../../types/ChatParticipants";
 import addChatParticipants from "./addChatParticipants.service";
+import { Chat } from "../../../types/Chat";
+
+interface Result extends Chat {
+  success: boolean;
+  participants: Array<ChatParticipants>;
+}
 
 const createChat = async (
   chatName: string,
   participants: Array<ChatParticipants>
-): Promise<boolean> => {
+): Promise<Result> => {
   const client = await pool.connect();
-  let success: boolean = false;
+  let result: Result = {
+    success: false,
+    participants: new Array<ChatParticipants>(),
+  };
 
   try {
     await client.query("BEGIN;");
     const { rows } = await client.query(
-      "INSERT INTO chats(name) VALUES($1) RETURNING id",
+      "INSERT INTO chats(name) VALUES($1) RETURNING *",
       [chatName]
     );
+    const chat = rows[0];
     await client.query("COMMIT");
-    success = await addChatParticipants(rows[0].id, participants);
+    result.success = await addChatParticipants(chat.id, participants);
+    result.participants = participants;
+    result.chatId = chat.id;
+    result.name = chat.name;
+    result.chatPicture = chat.chat_picture;
+    result.mostRecentMessage = "";
   } catch (error) {
     console.log(error);
     await client.query("ROLLBACK");
-    success = false;
+    result.success = false;
   } finally {
     client.release();
   }
 
-  return success;
+  return result;
 };
 
 export default createChat;
