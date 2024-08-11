@@ -3,21 +3,19 @@ import { useUser } from "../../../utils/UserContext";
 import { Avatar, ScrollArea, TextInput } from "@mantine/core";
 import ChatCreation from "./ChatCreation";
 import io from "socket.io-client";
+import { ChatValues } from "../../../types/ChatValues";
 
-interface Chat {
-  chatId: number;
-  name: string;
-  chatPicture?: string;
-  mostRecentMessage?: string;
+interface ChatMenuProps {
+  onChatSelect: (chat: ChatValues) => void;
 }
 
-const ChatMenu = () => {
+const ChatMenu = ({ onChatSelect }: ChatMenuProps) => {
   const { userData, isLoading } = useUser();
-  const [chats, setChats] = useState(new Array<Chat>());
+  const [chats, setChats] = useState(new Array<ChatValues>());
   const [isLoadingChats, setIsLoadingChats] = useState(true);
   const [error, setError] = useState(null);
 
-  const getChats = async (userId: string): Promise<Chat[]> => {
+  const getChats = async (userId: string): Promise<ChatValues[]> => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-chats?userId=${userId}`,
       {
@@ -54,8 +52,8 @@ const ChatMenu = () => {
 
     socket.emit("authenticate", { userId: userData.user.id });
 
-    socket.on("newChat", (newChat: Chat) => {
-      setChats((prevChats: Array<Chat>) => [...prevChats, newChat]);
+    socket.on("newChat", (newChat: ChatValues) => {
+      setChats((prevChats: Array<ChatValues>) => [...prevChats, newChat]);
     });
 
     return () => {
@@ -91,8 +89,12 @@ const ChatMenu = () => {
       />
       <ScrollArea>
         <ul>
-          {chats.map((chat: Chat) => (
-            <li key={chat.chatId} className="flex flex-row mt-2 mb-2">
+          {chats.map((chat: ChatValues) => (
+            <li
+              key={chat.chatId}
+              className="flex flex-row mt-2 mb-2 cursor-pointer"
+              onClick={() => onChatSelect(chat)}
+            >
               <Avatar radius="xl" size="lg" src={chat.chatPicture} />
               <div className="pl-2 overflow-hidden mt-auto mb-auto">
                 <a className="block truncate">{chat.name}</a>

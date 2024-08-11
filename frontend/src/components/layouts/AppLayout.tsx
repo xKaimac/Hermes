@@ -1,4 +1,4 @@
-import ChatMenu from "../navigation/chat-menu/ChatMenu";
+import ChatPage from "../chat/ChatPage";
 
 type AppLayoutProps = {
   children: JSX.Element;
@@ -7,7 +7,7 @@ type AppLayoutProps = {
 const AppLayout = ({ children }: AppLayoutProps) => {
   return (
     <div className="flex h-screen">
-      <ChatMenu />
+      <ChatPage />
       {children}
     </div>
   );

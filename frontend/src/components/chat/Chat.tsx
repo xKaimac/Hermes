@@ -1,9 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Settings from "../settings/Settings";
-import { Textarea } from "@mantine/core";
+import { Textarea, ScrollArea } from "@mantine/core";
+import { ChatValues } from "../../types/ChatValues";
 
-const Chat = () => {
+interface ChatProps {
+  selectedChat: ChatValues | null;
+}
+
+const Chat = ({ selectedChat }: ChatProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    if (selectedChat) {
+      // TODO: make an api call to get all the messages
+      setMessages([`Welcome to ${selectedChat.name}`]);
+    }
+  }, [selectedChat]);
 
   const toggleSettings = () => {
     setIsSettingsOpen(!isSettingsOpen);
@@ -16,7 +29,7 @@ const Chat = () => {
       >
         <div className="flex flex-row justify-between items-center">
           <h1 className="text-3xl text-text-light-primary dark:text-text-dark-primary">
-            Chat Name
+            {selectedChat ? selectedChat.name : "Select a chat"}
           </h1>
           <button
             onClick={toggleSettings}
@@ -25,7 +38,15 @@ const Chat = () => {
             ...
           </button>
         </div>
-        <div className="mt-auto pt-2"></div>
+        <div className="flex-grow overflow-hidden">
+          <ScrollArea className="h-full">
+            {messages.map((message: string, index: number) => (
+              <div key={index} className="mb-2">
+                {message}
+              </div>
+            ))}
+          </ScrollArea>
+        </div>
         <Textarea
           autosize
           className="mt-2 mb-2 p-2"
