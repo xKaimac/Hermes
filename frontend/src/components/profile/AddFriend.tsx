@@ -14,7 +14,7 @@ const addFriend = async ({
   userId,
 }: AddFriendParams): Promise<any> => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/user/add-friend`,
+    `${import.meta.env.VITE_BACKEND_URL}/protected/friends/add-friend`,
     {
       method: "POST",
       headers: {

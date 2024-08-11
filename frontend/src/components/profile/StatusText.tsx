@@ -18,7 +18,7 @@ const StatusText = () => {
 
   const updateStatusText = async ({ userStatus, userId }: UploadData) => {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/user/update-status-text`,
+      `${import.meta.env.VITE_BACKEND_URL}/protected/user/update-status-text`,
       {
         method: "POST",
         headers: {

@@ -29,7 +29,7 @@ const Username = () => {
     mutationFn: async (newUsername) => {
       console.log(newUsername);
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/user/username`,
+        `${import.meta.env.VITE_BACKEND_URL}/protected/user/set-username`,
         {
           method: "POST",
           headers: {

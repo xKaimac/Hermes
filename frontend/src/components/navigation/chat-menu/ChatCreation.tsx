@@ -44,7 +44,7 @@ const createChat = async ({
     })
   );
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/user/create-chat`,
+    `${import.meta.env.VITE_BACKEND_URL}/protected/chats/create-chat`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -60,7 +60,7 @@ const createChat = async ({
 
 const addFriend = async (friendName: string): Promise<any> => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/user/find-friend`,
+    `${import.meta.env.VITE_BACKEND_URL}/protected/friends/find-friend`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

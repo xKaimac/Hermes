@@ -24,7 +24,7 @@ interface FriendsData {
 
 const fetchFriends = async (userId: string): Promise<FriendsData> => {
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/user/get-friends`,
+    `${import.meta.env.VITE_BACKEND_URL}/protected/friends/get-friends`,
     {
       method: "POST",
       headers: {
@@ -85,7 +85,7 @@ const FriendsList: React.FC = () => {
   ) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/user/handle-friend-request`,
+        `${import.meta.env.VITE_BACKEND_URL}/protected/friends/handle-friend-request`,
         {
           method: "POST",
           headers: {

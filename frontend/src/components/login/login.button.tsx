@@ -6,7 +6,7 @@ type Provider = {
   name: string;
 };
 
-const LoginButton = ({ name, ...props }: Provider) => {
+const LoginButton = ({ name }: Provider) => {
   const getAuthURL = (): string => {
     const AUTH_URL = import.meta.env.VITE_BACKEND_URL;
     return `${AUTH_URL}/auth/${name}`;

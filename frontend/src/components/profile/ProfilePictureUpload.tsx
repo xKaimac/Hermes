@@ -12,7 +12,7 @@ const uploadProfilePicture = async ({ file, userId }: UploadData) => {
   formData.append("profilePicture", file);
   formData.append("userId", userId);
   const response = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/user/upload-profile-picture`,
+    `${import.meta.env.VITE_BACKEND_URL}/protected/user/upload-profile-picture`,
     {
       method: "POST",
       body: formData,
