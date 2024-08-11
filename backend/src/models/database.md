@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS friends (
 CREATE TABLE IF NOT EXISTS chats (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255),
+  chat_picture VARCHAR(255),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -85,6 +86,7 @@ CREATE TABLE IF NOT EXISTS chats (
 
 -   **id**: Unique identifier for each chat (Primary Key).
 -   **name**: Name of the chat.
+-   **chat_picture**: The picutre used in the chat preview.
 -   **created_at**: Timestamp indicating when the chat was created.
 
 ### Chat Participants Table

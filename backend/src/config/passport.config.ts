@@ -2,8 +2,8 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as DiscordStrategy } from "passport-discord";
 import { Strategy as GitHubStrategy } from "passport-github2";
-import { findUserById } from "../services/user.service";
-import findOrCreateUser from "../services/user.service";
+import { findUserById } from "../services/user/user.service";
+import findOrCreateUser from "../services/user/user.service";
 
 interface StrategyConfig {
   clientID: string;

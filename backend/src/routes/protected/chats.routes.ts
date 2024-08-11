@@ -2,6 +2,7 @@ import express from "express";
 import { isAuthenticated } from "../../middleware/auth.middleware";
 import createChat from "../../services/chats/createChat.service";
 import addChatParticipants from "../../services/chats/addChatParticipants.service";
+import getChats from "../../services/chats/getChats.services";
 
 const router = express.Router();
 
@@ -33,9 +34,12 @@ router.post("/add-chat-participants", isAuthenticated, async (req, res) => {
 
 router.get("/get-chats", isAuthenticated, async (req, res) => {
   try {
-    const { userId } = req.body;
-    await getChats(userId);
-    return res.status(200).json({ message: "Chats retrieved successfully" });
+    const { userId } = req.query;
+    console.log("in the api call" + userId);
+    const chats = await getChats(userId);
+    return res
+      .status(200)
+      .json({ message: "Chats retrieved successfully", chats: chats });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Failed to retrieve chats" });

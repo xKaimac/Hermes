@@ -1,4 +1,4 @@
-import ChatMenu from "../navigation/ChatMenu";
+import ChatMenu from "../navigation/chat-menu/ChatMenu";
 
 type AppLayoutProps = {
   children: JSX.Element;
