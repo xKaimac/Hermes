@@ -171,6 +171,11 @@ const ChatCreation = () => {
             onChange={(event) => setFriendName(event.currentTarget.value)}
             disabled={addFriendMutation.isPending}
             className="pb-2"
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleAddFriend(event);
+              }
+            }}
             rightSection={
               <Button
                 size="sm"
