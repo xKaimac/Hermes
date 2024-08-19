@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import Settings from "../settings/Settings";
 import { Textarea, ScrollArea } from "@mantine/core";
-import { ChatValues } from "../../types/ChatValues";
-
-interface ChatProps {
-  selectedChat: ChatValues | null;
-}
+import { ChatProps } from "../../types/ChatProps";
 
 const Chat = ({ selectedChat }: ChatProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -55,7 +51,7 @@ const Chat = ({ selectedChat }: ChatProps) => {
           placeholder="Type your message here"
         />
       </div>
-      {isSettingsOpen && <Settings />}
+      {isSettingsOpen && <Settings selectedChat={selectedChat} />}
     </div>
   );
 };

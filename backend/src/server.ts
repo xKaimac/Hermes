@@ -35,6 +35,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: process.env.HERMES_URL,
+    methods: ["GET", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );

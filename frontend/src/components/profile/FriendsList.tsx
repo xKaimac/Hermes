@@ -7,14 +7,7 @@ import { FaCheck } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { MdBlock } from "react-icons/md";
 import io from "socket.io-client";
-
-interface Friend {
-  id: string;
-  username: string;
-  status: string;
-  statusText: string;
-  profilePicture: string;
-}
+import { Friend } from "../../types/Friend";
 
 interface FriendsData {
   confirmedFriends: Friend[];
@@ -176,7 +169,7 @@ const FriendsList: React.FC = () => {
                 <h2 className="text-xl font-semibold mb-2 text-text-light-primary dark:text-text-dark-primary">
                   Confirmed Friends
                 </h2>
-                {renderFriendList(friends.confirmedFriends, "confirmed")}
+                {renderFriendList(friends.confirmedFriends, "accepted")}
               </>
             )}
             {friends.outgoingRequests.length > 0 && (

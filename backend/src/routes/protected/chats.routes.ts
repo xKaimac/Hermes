@@ -4,6 +4,9 @@ import createChat from "../../services/chats/createChat.service";
 import addChatParticipants from "../../services/chats/addChatParticipants.service";
 import getChats from "../../services/chats/getChats.services";
 import { emitNewChat } from "../../services/socket/socket.service";
+import getChatMembers from "../../services/chats/getChatMembers.service";
+import getRole from "../../services/chats/getRole.service";
+import addChatMember from "../../services/chats/addChatMember.service";
 
 const router = express.Router();
 
@@ -54,6 +57,45 @@ router.get("/get-chats", isAuthenticated, async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Failed to retrieve chats" });
+  }
+});
+
+router.post("/get-members", isAuthenticated, async (req, res) => {
+  try {
+    const { chatId } = req.body;
+    const success = await getChatMembers(chatId);
+    return res
+      .status(200)
+      .json({ message: "Members retrieved successfully", result: success });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to retrieve Members" });
+  }
+});
+
+router.post("/get-role", isAuthenticated, async (req, res) => {
+  try {
+    const { userId, chatId } = req.body;
+    const success = await getRole(userId, chatId);
+    return res
+      .status(200)
+      .json({ message: "Role retrieved successfully", result: success });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to retrieve role" });
+  }
+});
+
+router.post("/add-member", isAuthenticated, async (req, res) => {
+  try {
+    const { chatId, friendName, userId } = req.body;
+    const success = await addChatMember(chatId, friendName, userId);
+    return res
+      .status(200)
+      .json({ message: "Member added successfully", result: success });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to add member" });
   }
 });
 
