@@ -29,7 +29,6 @@ export const UserProvider = ({ children }: AppLayoutProps) => {
       return response.json();
     },
     staleTime: 5 * 60 * 1000,
-    retry: false,
   });
 
   const updateUserData = (newData: Partial<any>) => {
