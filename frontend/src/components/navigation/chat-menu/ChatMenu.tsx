@@ -7,9 +7,10 @@ import { ChatValues } from "../../../types/ChatValues";
 
 interface ChatMenuProps {
   onChatSelect: (chat: ChatValues) => void;
+  onProfileClick: () => void;
 }
 
-const ChatMenu = ({ onChatSelect }: ChatMenuProps) => {
+const ChatMenu = ({ onChatSelect, onProfileClick }: ChatMenuProps) => {
   const { userData, isLoading } = useUser();
   const [chats, setChats] = useState(new Array<ChatValues>());
   const [isLoadingChats, setIsLoadingChats] = useState(true);
@@ -106,10 +107,15 @@ const ChatMenu = ({ onChatSelect }: ChatMenuProps) => {
           ))}
         </ul>
       </ScrollArea>
-      <div className="border-t mt-auto pt-2">
-        <a href="profile">
-          <Avatar size="lg" src={userData.user.profile_picture} />
-        </a>
+      <div className="border-t mt-auto pt-2 ">
+        <div>
+          <Avatar
+            size="lg"
+            src={userData.user.profile_picture}
+            onClick={onProfileClick}
+            className="hover:cursor-pointer"
+          />
+        </div>
       </div>
     </div>
   );

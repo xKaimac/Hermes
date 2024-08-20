@@ -89,6 +89,7 @@ router.post("/get-role", isAuthenticated, async (req, res) => {
 router.post("/add-member", isAuthenticated, async (req, res) => {
   try {
     const { chatId, friendName, userId } = req.body;
+    console.log(chatId, friendName, userId);
     const success = await addChatMember(chatId, friendName, userId);
     return res
       .status(200)

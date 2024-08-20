@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaPlus, FaUserFriends } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { Popover, TextInput } from "@mantine/core";
 import { useUser } from "../../utils/UserContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,6 +8,10 @@ interface AddMemberParams {
   friendName: string;
   chatId: number;
   userId: number;
+}
+
+interface AddChatMemberProps {
+  chatId: number;
 }
 
 const addChatMember = async ({
@@ -32,7 +36,7 @@ const addChatMember = async ({
   return response.json();
 };
 
-const AddChatMember = (chatId: number) => {
+const AddChatMember = ({ chatId }: AddChatMemberProps) => {
   const [opened, setOpened] = useState(false);
   const [friendName, setFriendName] = useState("");
   const { userData } = useUser();
@@ -52,6 +56,7 @@ const AddChatMember = (chatId: number) => {
   const handleSendRequest = (event: React.FormEvent) => {
     event.preventDefault();
     if (!friendName.trim()) return;
+    console.log(chatId);
     mutation.mutate({ chatId: chatId, friendName, userId: userData.user.id });
   };
 

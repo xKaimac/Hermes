@@ -68,7 +68,7 @@ const createChatParticipantsTable = async () => {
     id SERIAL PRIMARY KEY,
     chat_id INTEGER REFERENCES chats(id),
     user_id INTEGER REFERENCES users(id),
-    role TEXT CHECK (role IN ('regular', 'admin')) DEFAULT 'user',
+    role TEXT CHECK (role IN ('regular', 'admin')) DEFAULT 'regular',
     joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(chat_id, user_id)
   );

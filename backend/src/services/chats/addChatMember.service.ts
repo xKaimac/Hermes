@@ -8,6 +8,7 @@ const addChatMember = async (
 ): Promise<Boolean> => {
   const client = await pool.connect();
   let result: boolean = false;
+  const role: string = "regular";
 
   const friend = await findFriend(userId, friendName);
   const friendId: string | undefined = friend.friendData?.id;
@@ -19,13 +20,13 @@ const addChatMember = async (
   try {
     await client.query("BEGIN;");
     await client.query(
-      "INSERT INTO chat_participants (user_id, chat_id) VALUES ($1, $2)",
-      [Number(friendId), chatId]
+      "INSERT INTO chat_participants (user_id, chat_id, role) VALUES ($1, $2, $3)",
+      [friendId, chatId, role]
     );
     await client.query("COMMIT");
     result = true;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     await client.query("ROLLBACK");
     result = false;
   } finally {

@@ -45,7 +45,6 @@ const Settings = ({ selectedChat }: SettingsProps) => {
       setError(null);
 
       const role = await getRoleStatus(selectedChat.chatId, userId);
-      console.log(role);
       setIsAdmin(role.result.role === "admin");
     } catch (err) {
       setError("Failed to fetch chat members");
@@ -63,7 +62,6 @@ const Settings = ({ selectedChat }: SettingsProps) => {
 
     try {
       const chatMembers = await getChatMembers(selectedChat.chatId);
-      console.log(chatMembers.result.members);
       setMembers(chatMembers.result.members);
     } catch (err) {
       setError("Failed to fetch chat members");
@@ -152,7 +150,7 @@ const Settings = ({ selectedChat }: SettingsProps) => {
             <h2 className="text-xl font-semibold mb-2 text-text-light-primary dark:text-text-dark-primary">
               Members
             </h2>
-            {isAdmin && <AddChatMember />}
+            {isAdmin && <AddChatMember chatId={selectedChat.chatId} />}
             <ScrollArea className="flex-grow">
               <ul className="divide-y divide-text-light-secondary/25 dark:divide-text-light-secondary/75">
                 {isLoading && <p>loading...</p>}
