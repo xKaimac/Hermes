@@ -122,35 +122,29 @@ const Settings = ({ selectedChat }: SettingsProps) => {
 
   return (
     <div className="flex flex-col w-1/2 bg-background-light dark:bg-background-dark h-[calc(100vh-2.5rem)] rounded-xl mt-5 mr-5 p-5 overflow-y-auto">
-      <h1 className="text-3xl text-text-light-primary dark:text-text-dark-primary mb-4">
-        Chat Settings
-      </h1>
-      <div className="mt-auto">
-        <ThemeToggle />
+      <div className="relative flex flex-col items-center justify-center py-4 bg-background-light dark:bg-background-dark">
+        <Avatar
+          src={selectedChat?.chatPicture || ""}
+          size="xl"
+          radius="xl"
+          className="mb-2"
+        />
+        <h3 className="text-2xl text-text-light-primary dark:text-text-dark-primary">
+          {selectedChat?.name || "Chat Settings"}
+        </h3>
+        <div className="absolute top-2 right-2">
+          <ThemeToggle />
+        </div>
       </div>
       {selectedChat ? (
         <>
           <div className="mb-4">
-            <TextInput
-              type="text"
-              value={chatName}
-              onChange={handleNameChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-          </div>
-          <div className="mb-4">
-            <TextInput
-              type="text"
-              value={chatPicture}
-              onChange={handlePictureChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-            />
-          </div>
-          <div className="mb-4">
-            <h2 className="text-xl font-semibold mb-2 text-text-light-primary dark:text-text-dark-primary">
-              Members
-            </h2>
-            {isAdmin && <AddChatMember chatId={selectedChat.chatId} />}
+            <div className="flex flex-row">
+              <h2 className="text-xl font-semibold mb-2 text-text-light-primary dark:text-text-dark-primary">
+                Members
+              </h2>
+              {isAdmin && <AddChatMember chatId={selectedChat.chatId} />}
+            </div>
             <ScrollArea className="flex-grow">
               <ul className="divide-y divide-text-light-secondary/25 dark:divide-text-light-secondary/75">
                 {isLoading && <p>loading...</p>}

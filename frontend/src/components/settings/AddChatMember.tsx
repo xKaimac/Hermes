@@ -31,7 +31,9 @@ const addChatMember = async ({
     }
   );
   if (!response.ok) {
-    throw new Error("Sorry, we can't find that user");
+    throw new Error(
+      "Sorry, we can't find that user or they're not on your friends list"
+    );
   }
   return response.json();
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Settings from "../settings/Settings";
-import { Textarea, ScrollArea } from "@mantine/core";
+import { Textarea, ScrollArea, Avatar } from "@mantine/core";
 import { ChatProps } from "../../types/ChatProps";
 
 const Chat = ({ selectedChat }: ChatProps) => {
@@ -24,9 +24,14 @@ const Chat = ({ selectedChat }: ChatProps) => {
         className={`flex flex-col ${isSettingsOpen ? "w-3/4" : "w-full"} bg-background-light dark:bg-background-dark h-[calc(100vh-2.5rem)] rounded-xl mb-5 mt-5 mr-5 p-5 overflow-hidden transition-all duration-300`}
       >
         <div className="flex flex-row justify-between items-center">
-          <h1 className="text-3xl text-text-light-primary dark:text-text-dark-primary">
-            {selectedChat ? selectedChat.name : "Select a chat"}
-          </h1>
+          <div className="flex flex-row">
+            {selectedChat && (
+              <Avatar src={selectedChat.chatPicture} radius="xl" size="md" />
+            )}
+            <h1 className="pl-2 text-3xl text-text-light-primary dark:text-text-dark-primary">
+              {selectedChat ? selectedChat.name : "Select a chat"}
+            </h1>
+          </div>
           <button
             onClick={toggleSettings}
             className="text-3xl text-text-light-primary dark:text-text-dark-primary"
