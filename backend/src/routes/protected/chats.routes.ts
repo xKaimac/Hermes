@@ -94,6 +94,7 @@ router.post("/add-member", isAuthenticated, async (req, res) => {
   try {
     const { chatId, friendName, userId } = req.body;
     const success = await addChatMember(chatId, friendName, userId);
+
     return res
       .status(200)
       .json({ message: "Member added successfully", result: success });

@@ -1,30 +1,41 @@
-import { useState } from "react";
-import { useUser } from "../../utils/UserContext";
+import { useState, useEffect } from "react";
 import { Button, Textarea } from "@mantine/core";
 import { FaArrowCircleRight } from "react-icons/fa";
 import { useMutation } from "@tanstack/react-query";
 import { MdEdit } from "react-icons/md";
 
 interface UploadData {
-  userStatus: string;
-  userId: string;
+  chatName: string;
+  chatId: string;
 }
 
-const StatusText = () => {
-  const { userData, updateUserData } = useUser();
-  const userId = userData.user.id;
-  const [userStatus, setUserStatus] = useState(userData.user.status_text);
+interface UpdateChatNameParams {
+  chatId: string;
+  chatName: string;
+  isAdmin: boolean;
+}
+
+const UpdateChatName = ({
+  chatId,
+  chatName,
+  isAdmin,
+}: UpdateChatNameParams) => {
+  const [currentChatName, setCurrentChatName] = useState(chatName);
   const [isEditing, setIsEditing] = useState(false);
 
-  const updateStatusText = async ({ userStatus, userId }: UploadData) => {
+  useEffect(() => {
+    setCurrentChatName(chatName);
+  }, [chatName]);
+
+  const updateChatName = async ({ chatName, chatId }: UploadData) => {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/protected/user/update-status-text`,
+      `${import.meta.env.VITE_BACKEND_URL}/protected/chat/update-chat-name`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userStatus, userId }),
+        body: JSON.stringify({ chatName, chatId }),
         credentials: "include",
       }
     );
@@ -35,20 +46,20 @@ const StatusText = () => {
   };
 
   const mutation = useMutation({
-    mutationFn: updateStatusText,
+    mutationFn: updateChatName,
     onSuccess: (data) => {
-      updateUserData({ status_text: data.result.status_text });
+      setCurrentChatName(data.chatName);
     },
   });
 
   const handleClick = (e?: any) => {
     e?.preventDefault();
     setIsEditing(false);
-    mutation.mutate({ userStatus, userId: userId });
+    mutation.mutate({ chatName, chatId: chatId });
   };
 
   const handleOnChange = (event: any) => {
-    setUserStatus(event.target.value);
+    setCurrentChatName(event.target.value);
   };
 
   const handleKeyPress = (event: any) => {
@@ -75,16 +86,18 @@ const StatusText = () => {
         <>
           <div className="flex flex-row w-3/4 lg:w-1/2 xl:w-1/3 pt-5 text-center items-center justify-center">
             <p className="text-text-light-secondary dark:text-text-dark-secondary">
-              {userStatus}
+              {currentChatName}
             </p>
           </div>
-          <Button
-            variant="transparent"
-            onClick={() => setIsEditing(true)}
-            className="text-text-light-primary dark:text-text-light-secondary w-1/2"
-          >
-            <MdEdit size={"1vw"} />
-          </Button>
+          {isAdmin && (
+            <Button
+              variant="transparent"
+              onClick={() => setIsEditing(true)}
+              className="text-text-light-primary dark:text-text-light-secondary w-1/2"
+            >
+              <MdEdit size={"1vw"} />
+            </Button>
+          )}
         </>
       ) : (
         <div className="w-3/4 lg:w-1/2 xl:w-1/3 pt-5">
@@ -94,7 +107,7 @@ const StatusText = () => {
             autosize
             minRows={1}
             maxRows={8}
-            value={userStatus}
+            value={currentChatName}
             rightSection={<EnterComponent />}
             onChange={handleOnChange}
             onKeyPress={handleKeyPress}
@@ -105,4 +118,4 @@ const StatusText = () => {
   );
 };
 
-export default StatusText;
+export default UpdateChatName;
