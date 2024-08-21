@@ -3,12 +3,17 @@ import { isAuthenticated } from "../../middleware/auth.middleware";
 import createChat from "../../services/chats/createChat.service";
 import addChatParticipants from "../../services/chats/addChatParticipants.service";
 import getChats from "../../services/chats/getChats.services";
-import { emitNewChat } from "../../services/socket/socket.service";
+import {
+  emitNewChat,
+  emitNewMessage,
+} from "../../services/socket/socket.service";
 import getChatMembers from "../../services/chats/getChatMembers.service";
 import getRole from "../../services/chats/getRole.service";
 import addChatMember from "../../services/chats/addChatMember.service";
 import uploadChatPicture from "../../services/chats/uploadChatPicture.service";
 import updateChatPicture from "../../services/chats/updateChatPicture.service";
+import getAllMessages from "../../services/chats/getAllMessages.service";
+import sendMessage from "../../services/chats/sendMessage.service";
 
 const router = express.Router();
 const multer = require("multer");
@@ -117,11 +122,46 @@ router.post(
       const { chatId } = req.body;
       const result: any = await uploadChatPicture(req.file);
       updateChatPicture(chatId, result.secure_url);
-      res.status(200).json({ message: "Upload successful", result });
+      return res.status(200).json({ message: "Upload successful", result });
     } catch (error) {
-      res.status(500).send("Error uploading file");
+      return res.status(500).send("Error uploading file");
     }
   }
 );
+
+router.post("/get-all-messages", isAuthenticated, async (req, res) => {
+  try {
+    const { chatId } = req.body;
+    const result = await getAllMessages(chatId);
+    return res
+      .status(200)
+      .json({ message: "Messages retrieved successfully", result });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to retrieve messages" });
+  }
+});
+
+router.post("/send-message", isAuthenticated, async (req, res) => {
+  try {
+    const { chatId, userId, content } = req.body;
+    const result = await sendMessage(chatId, userId, content);
+    const members = await getChatMembers(chatId);
+
+    emitNewMessage(
+      members.members.map((member) => member.id),
+      {
+        chatId: chatId,
+        userId: userId,
+        content: content,
+      }
+    );
+
+    return res
+      .status(200)
+      .json({ message: "Message sent successfully!", result });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to send message" });
+  }
+});
 
 export default router;

@@ -36,3 +36,9 @@ export const emitNewChat = (participants: string[], chatData: any) => {
     io.to(userId).emit("newChat", chatData);
   });
 };
+
+export const emitNewMessage = (participants: string[], messageData: any) => {
+  participants.forEach((userId) => {
+    io.to(userId).emit("newMessage", messageData);
+  });
+};

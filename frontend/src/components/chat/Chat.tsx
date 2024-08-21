@@ -2,20 +2,145 @@ import { useState, useEffect } from "react";
 import Settings from "../settings/Settings";
 import { Textarea, ScrollArea, Avatar } from "@mantine/core";
 import { ChatProps } from "../../types/ChatProps";
+import { FaArrowCircleRight } from "react-icons/fa";
+import { useUser } from "../../utils/UserContext";
+import { useMutation } from "@tanstack/react-query";
+
+interface Message {
+  sender_id: string;
+  content: string;
+  created_at: number;
+}
+
+interface MessageData {
+  chatId: number;
+  userId: number;
+  content: string;
+}
 
 const Chat = ({ selectedChat }: ChatProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const { userData, updateUserData } = useUser();
 
   useEffect(() => {
     if (selectedChat) {
-      // TODO: make an api call to get all the messages
-      setMessages([`Welcome to ${selectedChat.name}`]);
+      fetchMessages();
     }
+
+    const socket = io(`${import.meta.env.VITE_BACKEND_URL}`);
+
+    socket.emit("authenticate", { userId: userData.user.id });
+
+    socket.on("newChat", (newMessage: Message) => {
+      setMessages((prevMessages: Array<Message>) => [
+        ...prevMessages,
+        newMessage,
+      ]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, [selectedChat]);
 
   const toggleSettings = () => {
     setIsSettingsOpen(!isSettingsOpen);
+  };
+
+  const fetchMessages = async () => {
+    if (!selectedChat) return;
+
+    setIsLoading(true);
+
+    try {
+      const allMessages = await getMessages(selectedChat.chatId);
+      setMessages(allMessages.result.messages);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getMessages = async (chatId: number) => {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-all-messages`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chatId }),
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch messages");
+    }
+
+    return response.json();
+  };
+
+  const sendMessage = async ({ chatId, userId, content }: MessageData) => {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/protected/chats/send-message`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chatId, userId, content }),
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to send message");
+    }
+
+    return response.json();
+  };
+
+  const mutation = useMutation({
+    mutationFn: sendMessage,
+    onSuccess: (data) => {
+      updateUserData({ status_text: data.result.status_text });
+    },
+  });
+
+  const handleOnChange = (event: any) => {
+    setMessage(event.target.value);
+  };
+
+  const handleClick = (e?: any) => {
+    e?.preventDefault();
+    mutation.mutate({
+      chatId: selectedChat.chatId,
+      userId: userData.user.id,
+      content: message,
+    });
+  };
+
+  const handleKeyPress = (event: any) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleClick();
+    }
+  };
+
+  const EnterComponent = () => {
+    return (
+      <button
+        onClick={handleClick}
+        className="p-2 text-surface-light dark:text-surface-dark w-10 h-10 flex items-center justify-center"
+      >
+        <FaArrowCircleRight />
+      </button>
+    );
   };
 
   return (
@@ -39,13 +164,18 @@ const Chat = ({ selectedChat }: ChatProps) => {
             ...
           </button>
         </div>
+
         <div className="flex-grow overflow-hidden">
           <ScrollArea className="h-full">
-            {messages.map((message: string, index: number) => (
-              <div key={index} className="mb-2">
-                {message}
-              </div>
-            ))}
+            {isLoading && <p className="p-4">Loading...</p>}
+            {!isLoading &&
+              messages.map((message: Message, index: number) => (
+                <div key={index} className="mb-2">
+                  Sent by: {message.sender_id}
+                  Content: {message.content}
+                  Time: {new Date(message.created_at).toString()}
+                </div>
+              ))}
           </ScrollArea>
         </div>
         <Textarea
@@ -53,7 +183,10 @@ const Chat = ({ selectedChat }: ChatProps) => {
           className="mt-2 mb-2 p-2"
           radius="xl"
           maxRows={25}
+          rightSection={<EnterComponent />}
           placeholder="Type your message here"
+          onChange={handleOnChange}
+          onKeyPress={handleKeyPress}
         />
       </div>
       {isSettingsOpen && <Settings selectedChat={selectedChat} />}
