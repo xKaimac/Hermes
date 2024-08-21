@@ -13,7 +13,7 @@ const getMostRecentMessage = async (chatId: string): Promise<string> => {
   try {
     await client.query("BEGIN");
     const { rows } = await client.query(
-      "SELECT DISTINCT ON (chat_id) content FROM messages WHERE chat_id = $1",
+      "SELECT content FROM messages WHERE chat_id = $1 ORDER BY created_at DESC LIMIT 1",
       [chatId]
     );
     await client.query("COMMIT");
