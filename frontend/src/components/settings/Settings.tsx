@@ -5,6 +5,7 @@ import { Avatar, ScrollArea, TextInput } from "@mantine/core";
 import { ChatMember } from "../../types/ChatMember";
 import AddChatMember from "./AddChatMember";
 import { useUser } from "../../utils/UserContext";
+import ChatPictureUpload from "./ChatPictureUpload";
 
 interface SettingsProps {
   selectedChat: ChatValues | null;
@@ -28,14 +29,6 @@ const Settings = ({ selectedChat }: SettingsProps) => {
       fetchRoleStatus();
     }
   }, [selectedChat]);
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setChatName(e.target.value);
-  };
-
-  const handlePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setChatPicture(e.target.value);
-  };
 
   const fetchRoleStatus = async () => {
     if (!selectedChat) return;
@@ -122,22 +115,21 @@ const Settings = ({ selectedChat }: SettingsProps) => {
 
   return (
     <div className="flex flex-col w-1/2 bg-background-light dark:bg-background-dark h-[calc(100vh-2.5rem)] rounded-xl mt-5 mr-5 p-5 overflow-y-auto">
-      <div className="relative flex flex-col items-center justify-center py-4 bg-background-light dark:bg-background-dark">
-        <Avatar
-          src={selectedChat?.chatPicture || ""}
-          size="xl"
-          radius="xl"
-          className="mb-2"
-        />
-        <h3 className="text-2xl text-text-light-primary dark:text-text-dark-primary">
-          {selectedChat?.name || "Chat Settings"}
-        </h3>
-        <div className="absolute top-2 right-2">
-          <ThemeToggle />
-        </div>
-      </div>
       {selectedChat ? (
         <>
+          <div className="relative flex flex-col items-center justify-center py-4 bg-background-light dark:bg-background-dark">
+            <ChatPictureUpload
+              isAdmin={isAdmin}
+              chatId={selectedChat?.chatId.toString() || ""}
+              chatPicture={selectedChat?.chatPicture || ""}
+            />
+            <h3 className="text-2xl text-text-light-primary dark:text-text-dark-primary">
+              {selectedChat?.name || "Chat Settings"}
+            </h3>
+            <div className="absolute top-2 right-2">
+              <ThemeToggle />
+            </div>
+          </div>
           <div className="mb-4">
             <div className="flex flex-row">
               <h2 className="text-xl font-semibold mb-2 text-text-light-primary dark:text-text-dark-primary">

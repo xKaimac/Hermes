@@ -7,8 +7,12 @@ import { emitNewChat } from "../../services/socket/socket.service";
 import getChatMembers from "../../services/chats/getChatMembers.service";
 import getRole from "../../services/chats/getRole.service";
 import addChatMember from "../../services/chats/addChatMember.service";
+import uploadChatPicture from "../../services/chats/uploadChatPicture.service";
+import updateChatPicture from "../../services/chats/updateChatPicture.service";
 
 const router = express.Router();
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.post("/create-chat", isAuthenticated, async (req, res) => {
   try {
@@ -98,5 +102,25 @@ router.post("/add-member", isAuthenticated, async (req, res) => {
     return res.status(500).json({ message: "Failed to add member" });
   }
 });
+
+router.post(
+  "/upload-chat-picture",
+  upload.single("chatPicture"),
+  isAuthenticated,
+  async (req, res) => {
+    if (!req.file) {
+      return res.status(400).send("No file uploaded.");
+    }
+
+    try {
+      const { chatId } = req.body;
+      const result: any = await uploadChatPicture(req.file);
+      updateChatPicture(chatId, result.secure_url);
+      res.status(200).json({ message: "Upload successful", result });
+    } catch (error) {
+      res.status(500).send("Error uploading file");
+    }
+  }
+);
 
 export default router;
