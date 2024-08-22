@@ -1,4 +1,4 @@
-import pool from "../../config/db.config";
+import pool from '../../config/db.config';
 
 const handleFriendRequest = async (
   action: string,
@@ -6,24 +6,24 @@ const handleFriendRequest = async (
   friendId: string
 ): Promise<boolean> => {
   const client = await pool.connect();
-  let success: boolean = false;
-  console.log(action);
+  let success = false;
 
   try {
-    await client.query("BEGIN;");
+    await client.query('BEGIN;');
     await client.query(
-      "UPDATE friends SET status = $1 WHERE (user_id = $2 AND friend_id = $3) OR (user_id = $3 AND friend_id = $2)",
+      'UPDATE friends SET status = $1 WHERE (user_id = $2 AND friend_id = $3) OR (user_id = $3 AND friend_id = $2)',
       [action, userId, friendId]
     );
-    await client.query("COMMIT");
+    await client.query('COMMIT');
     success = true;
   } catch (error) {
     console.log(error);
-    await client.query("ROLLBACK");
+    await client.query('ROLLBACK');
     success = false;
   } finally {
     client.release();
   }
+
   return success;
 };
 

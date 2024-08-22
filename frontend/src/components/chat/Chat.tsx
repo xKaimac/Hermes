@@ -1,28 +1,17 @@
-import { useState, useEffect } from "react";
-import Settings from "../settings/Settings";
-import { Textarea, ScrollArea, Avatar } from "@mantine/core";
-import { ChatProps } from "../../types/ChatProps";
-import { FaArrowCircleRight } from "react-icons/fa";
-import { useUser } from "../../utils/UserContext";
-import { useMutation } from "@tanstack/react-query";
-
-interface Message {
-  sender_id: string;
-  content: string;
-  created_at: number;
-}
-
-interface MessageData {
-  chatId: number;
-  userId: number;
-  content: string;
-}
+import { useState, useEffect } from 'react';
+import Settings from '../settings/Settings';
+import { Textarea, ScrollArea, Avatar } from '@mantine/core';
+import { ChatProps } from '../../types/ChatProps';
+import { FaArrowCircleRight } from 'react-icons/fa';
+import { useUser } from '../../utils/UserContext';
+import { useMutation } from '@tanstack/react-query';
+import { Message } from '../../../../shared/types/Message';
 
 const Chat = ({ selectedChat }: ChatProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const { userData, updateUserData } = useUser();
 
   useEffect(() => {
@@ -32,9 +21,9 @@ const Chat = ({ selectedChat }: ChatProps) => {
 
     const socket = io(`${import.meta.env.VITE_BACKEND_URL}`);
 
-    socket.emit("authenticate", { userId: userData.user.id });
+    socket.emit('authenticate', { sender_id: userData.user.id });
 
-    socket.on("newChat", (newMessage: Message) => {
+    socket.on('newMessage', (newMessage: Message) => {
       setMessages((prevMessages: Array<Message>) => [
         ...prevMessages,
         newMessage,
@@ -56,7 +45,8 @@ const Chat = ({ selectedChat }: ChatProps) => {
     setIsLoading(true);
 
     try {
-      const allMessages = await getMessages(selectedChat.chatId);
+      const allMessages = await getMessages(selectedChat.chat_id);
+
       setMessages(allMessages.result.messages);
     } catch (err) {
       console.error(err);
@@ -65,41 +55,41 @@ const Chat = ({ selectedChat }: ChatProps) => {
     }
   };
 
-  const getMessages = async (chatId: number) => {
+  const getMessages = async (chat_id: number) => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-all-messages`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ chatId }),
-        credentials: "include",
+        body: JSON.stringify({ chat_id }),
+        credentials: 'include',
       }
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch messages");
+      throw new Error('Failed to fetch messages');
     }
 
     return response.json();
   };
 
-  const sendMessage = async ({ chatId, userId, content }: MessageData) => {
+  const sendMessage = async ({ chat_id, sender_id, content }: Message) => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/chats/send-message`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ chatId, userId, content }),
-        credentials: "include",
+        body: JSON.stringify({ chat_id, sender_id, content }),
+        credentials: 'include',
       }
     );
 
     if (!response.ok) {
-      throw new Error("Failed to send message");
+      throw new Error('Failed to send message');
     }
 
     return response.json();
@@ -112,21 +102,21 @@ const Chat = ({ selectedChat }: ChatProps) => {
     },
   });
 
-  const handleOnChange = (event: any) => {
+  const handleOnChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(event.target.value);
   };
 
-  const handleClick = (e?: any) => {
-    e?.preventDefault();
+  const handleClick = (event?: React.MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
     mutation.mutate({
-      chatId: selectedChat.chatId,
-      userId: userData.user.id,
+      chat_id: selectedChat.chat_id,
+      sender_id: userData.user.id,
       content: message,
     });
   };
 
-  const handleKeyPress = (event: any) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       handleClick();
     }
@@ -136,7 +126,7 @@ const Chat = ({ selectedChat }: ChatProps) => {
     return (
       <button
         onClick={handleClick}
-        className="p-2 text-surface-light dark:text-surface-dark w-10 h-10 flex items-center justify-center"
+        className="text-surface-light dark:text-surface-dark flex h-10 w-10 items-center justify-center p-2"
       >
         <FaArrowCircleRight />
       </button>
@@ -146,25 +136,24 @@ const Chat = ({ selectedChat }: ChatProps) => {
   return (
     <div className="flex w-full">
       <div
-        className={`flex flex-col ${isSettingsOpen ? "w-3/4" : "w-full"} bg-background-light dark:bg-background-dark h-[calc(100vh-2.5rem)] rounded-xl mb-5 mt-5 mr-5 p-5 overflow-hidden transition-all duration-300`}
+        className={`flex flex-col ${isSettingsOpen ? 'w-3/4' : 'w-full'} bg-background-light dark:bg-background-dark mb-5 mr-5 mt-5 h-[calc(100vh-2.5rem)] overflow-hidden rounded-xl p-5 transition-all duration-300`}
       >
-        <div className="flex flex-row justify-between items-center">
+        <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row">
             {selectedChat && (
               <Avatar src={selectedChat.chatPicture} radius="xl" size="md" />
             )}
-            <h1 className="pl-2 text-3xl text-text-light-primary dark:text-text-dark-primary">
-              {selectedChat ? selectedChat.name : "Select a chat"}
+            <h1 className="text-text-light-primary dark:text-text-dark-primary pl-2 text-3xl">
+              {selectedChat ? selectedChat.name : 'Select a chat'}
             </h1>
           </div>
           <button
             onClick={toggleSettings}
-            className="text-3xl text-text-light-primary dark:text-text-dark-primary"
+            className="text-text-light-primary dark:text-text-dark-primary text-3xl"
           >
             ...
           </button>
         </div>
-
         <div className="flex-grow overflow-hidden">
           <ScrollArea className="h-full">
             {isLoading && <p className="p-4">Loading...</p>}
@@ -173,14 +162,14 @@ const Chat = ({ selectedChat }: ChatProps) => {
                 <div key={index} className="mb-2">
                   Sent by: {message.sender_id}
                   Content: {message.content}
-                  Time: {new Date(message.created_at).toString()}
+                  Time: {message.created_at && new Date(message.created_at).toString()}
                 </div>
               ))}
           </ScrollArea>
         </div>
         <Textarea
           autosize
-          className="mt-2 mb-2 p-2"
+          className="mb-2 mt-2 p-2"
           radius="xl"
           maxRows={25}
           rightSection={<EnterComponent />}

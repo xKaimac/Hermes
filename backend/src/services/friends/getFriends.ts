@@ -1,16 +1,17 @@
-import pool from "../../config/db.config";
-import { FriendData } from "../../../types/FriendData";
+import pool from '../../config/db.config';
+import { Friend } from '../../../../shared/types/Friend';
 
 interface FriendsResult {
-  confirmedFriends: FriendData[];
-  outgoingRequests: FriendData[];
-  incomingRequests: FriendData[];
+  confirmedFriends: Friend[];
+  outgoingRequests: Friend[];
+  incomingRequests: Friend[];
 }
 
 const getFriends = async (userId: string): Promise<FriendsResult> => {
   const client = await pool.connect();
+
   try {
-    await client.query("BEGIN;");
+    await client.query('BEGIN;');
 
     const { rows: friendships } = await client.query(
       `SELECT f.user_id, f.friend_id, f.status, 
@@ -23,13 +24,13 @@ const getFriends = async (userId: string): Promise<FriendsResult> => {
       [userId]
     );
 
-    const confirmedFriends: FriendData[] = [];
-    const outgoingRequests: FriendData[] = [];
-    const incomingRequests: FriendData[] = [];
+    const confirmedFriends: Friend[] = [];
+    const outgoingRequests: Friend[] = [];
+    const incomingRequests: Friend[] = [];
 
     friendships.forEach((friendship) => {
       const isInitiator = friendship.user_id === userId;
-      const friendData: FriendData = {
+      const friendData: Friend = {
         id: isInitiator ? friendship.friend_id : friendship.user_id,
         username: isInitiator
           ? friendship.friend_username
@@ -45,9 +46,9 @@ const getFriends = async (userId: string): Promise<FriendsResult> => {
           : friendship.user_profile_picture,
       };
 
-      if (friendship.status === "accepted") {
+      if (friendship.status === 'accepted') {
         confirmedFriends.push(friendData);
-      } else if (friendship.status === "pending") {
+      } else if (friendship.status === 'pending') {
         if (isInitiator) {
           outgoingRequests.push(friendData);
         } else {
@@ -56,10 +57,11 @@ const getFriends = async (userId: string): Promise<FriendsResult> => {
       }
     });
 
-    await client.query("COMMIT");
+    await client.query('COMMIT');
+
     return { confirmedFriends, outgoingRequests, incomingRequests };
   } catch (error) {
-    await client.query("ROLLBACK");
+    await client.query('ROLLBACK');
     throw error;
   } finally {
     client.release();

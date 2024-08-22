@@ -1,45 +1,39 @@
-import pool from "../../config/db.config";
-import { findUserByName } from "../user/user.service";
-import { FriendData } from "../../../types/FriendData";
-
-interface Result {
-  friendData: FriendData | undefined;
-  success: boolean;
-}
+import pool from '../../config/db.config';
+import { findUserByName } from '../user/user.service';
+import { User } from '../../../../shared/types/User';
 
 const findFriend = async (
-  userId: string,
+  user_id: number,
   friendName: string
-): Promise<Result> => {
+): Promise<User | null> => {
   const client = await pool.connect();
-  const friendData: FriendData = await findUserByName(friendName);
-  let result: Result = { friendData: friendData, success: false };
+  const friend: User = await findUserByName(friendName);
 
-  if (!friendData.id) {
-    return result;
+  if (!friend.id) {
+    return null;
   }
 
   try {
-    await client.query("BEGIN;");
+    await client.query('BEGIN;');
 
     const { rows } = await client.query(
-      "SELECT * FROM friends WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)",
-      [userId, friendData.id]
+      'SELECT * FROM friends WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)',
+      [user_id, friend.id]
     );
 
-    await client.query("COMMIT");
+    await client.query('COMMIT');
 
-    if (rows.length > 0) {
-      result.success = true;
+    if (rows.length <= 0) {
+      return null;
     }
   } catch (error) {
-    await client.query("ROLLBACK");
-    result.success = false;
+    await client.query('ROLLBACK');
+    return null;
   } finally {
     client.release();
   }
 
-  return result;
+  return friend;
 };
 
 export default findFriend;

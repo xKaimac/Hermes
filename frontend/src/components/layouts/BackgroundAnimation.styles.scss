@@ -57,7 +57,7 @@
   &::before,
   &::after {
     position: absolute;
-    content: "";
+    content: '';
     top: 0;
     left: calc(var(--star-width) / -2);
     width: var(--star-width);

@@ -1,38 +1,31 @@
-import { useUser } from "../utils/UserContext";
-import ProfilePictureUpload from "../components/profile/ProfilePictureUpload";
-import StatusText from "../components/profile/StatusText";
-import FriendsList from "../components/profile/FriendsList";
-import { FiLogOut } from "react-icons/fi";
-import { useEffect } from "react";
+import { useUser } from '../utils/UserContext';
+import ProfilePictureUpload from '../components/profile/ProfilePictureUpload';
+import StatusText from '../components/profile/StatusText';
+import FriendsList from '../components/profile/FriendsList';
+import { FiLogOut } from 'react-icons/fi';
 
 const Profile = () => {
   const { userData, isLoading, error } = useUser();
-
-  useEffect(() => {
-    console.log("Profile component mounted");
-    console.log("userData:", userData);
-    console.log("isLoading:", isLoading);
-    console.log("error:", error);
-  }, [userData, isLoading, error]);
 
   const logout = async () => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/user/logout`,
         {
-          method: "GET",
+          method: 'GET',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-          credentials: "include",
+          credentials: 'include',
         }
       );
+
       if (!response.ok) {
-        throw new Error("Failed to logout");
+        throw new Error('Failed to logout');
       }
       window.location.href = `/login`;
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
     }
   };
 

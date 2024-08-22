@@ -1,4 +1,4 @@
-import ChatPage from "../chat/ChatPage";
+import ChatPage from '../chat/ChatPage';
 
 type AppLayoutProps = {
   children: JSX.Element;

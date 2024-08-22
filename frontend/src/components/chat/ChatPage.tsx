@@ -1,8 +1,8 @@
-import { useState } from "react";
-import ChatMenu from "../navigation/chat-menu/ChatMenu";
-import Chat from "./Chat";
-import Profile from "../../pages/Profile";
-import { ChatValues } from "../../types/ChatValues";
+import { useState } from 'react';
+import ChatMenu from '../navigation/chat-menu/ChatMenu';
+import Chat from './Chat';
+import Profile from '../../pages/Profile';
+import { ChatValues } from '../../types/ChatValues';
 
 const ChatPage = () => {
   const [selectedChat, setSelectedChat] = useState(null);
@@ -19,7 +19,7 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="flex flex-row w-full">
+    <div className="flex w-full flex-row">
       <ChatMenu
         onChatSelect={handleChatSelect}
         onProfileClick={handleProfileClick}

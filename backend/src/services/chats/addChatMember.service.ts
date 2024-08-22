@@ -1,16 +1,16 @@
-import pool from "../../config/db.config";
-import findFriend from "../friends/findFriend";
+import pool from '../../config/db.config';
+import findFriend from '../friends/findFriend';
 
 const addChatMember = async (
-  chatId: any,
-  friendName: any,
-  userId: any
-): Promise<Boolean> => {
+  chat_id: number,
+  friendName: string,
+  user_id: number
+): Promise<boolean> => {
   const client = await pool.connect();
-  let result: boolean = false;
-  const role: string = "regular";
+  let result = false;
+  const role = 'regular';
 
-  const friend = await findFriend(userId, friendName);
+  const friend = await findFriend(user_id, friendName);
   const friendId: string | undefined = friend.friendData?.id;
 
   if (!friendId) {
@@ -18,16 +18,16 @@ const addChatMember = async (
   }
 
   try {
-    await client.query("BEGIN;");
+    await client.query('BEGIN;');
     await client.query(
-      "INSERT INTO chat_participants (user_id, chat_id, role) VALUES ($1, $2, $3)",
-      [friendId, chatId, role]
+      'INSERT INTO chat_participants (user_id, chat_id, role) VALUES ($1, $2, $3)',
+      [friendId, chat_id, role]
     );
-    await client.query("COMMIT");
+    await client.query('COMMIT');
     result = true;
   } catch (error) {
     console.error(error);
-    await client.query("ROLLBACK");
+    await client.query('ROLLBACK');
     result = false;
   } finally {
     client.release();

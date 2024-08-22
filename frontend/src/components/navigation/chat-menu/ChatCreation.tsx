@@ -10,6 +10,7 @@ import { useState } from "react";
 import { FaArrowCircleRight, FaPlus, FaTimes } from "react-icons/fa";
 import { useUser } from "../../../utils/UserContext";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { User } from "../../../../../shared/types/User";
 
 // This is the format the backend returns the friends as
 interface Friend {
@@ -43,6 +44,7 @@ const createChat = async ({
       role,
     })
   );
+
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/chats/create-chat`,
     {
@@ -52,13 +54,15 @@ const createChat = async ({
       credentials: "include",
     }
   );
+
   if (!response.ok) {
     throw new Error("Failed to create chat");
   }
+
   return response.json();
 };
 
-const addFriend = async (friendName: string): Promise<any> => {
+const addFriend = async (friendName: string): Promise<User> => {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/friends/find-friend`,
     {
@@ -68,10 +72,14 @@ const addFriend = async (friendName: string): Promise<any> => {
       credentials: "include",
     }
   );
+
   if (!response.ok) {
     throw new Error("Friend not found");
   }
-  return response.json();
+
+  const data = await response.json();
+
+  return data.result.friend;
 };
 
 const ChatCreation = () => {
@@ -110,13 +118,12 @@ const ChatCreation = () => {
 
   const addFriendMutation = useMutation({
     mutationFn: addFriend,
-    onSuccess: (data) => {
-      console.log(data.result.friendData);
+    onSuccess: (friend) => {
+
       setParticipants((prev: Array<Participant>) => [
         ...prev,
-        { ...data.result.friendData, role: "regular" },
+        { ...friend, role: "regular" },
       ]);
-      console.log(participants);
       setFriendName("");
     },
   });
@@ -176,7 +183,7 @@ const ChatCreation = () => {
                 handleAddFriend(event);
               }
             }}
-            rightSection={
+            rightSection={(
               <Button
                 size="sm"
                 variant="transparent"
@@ -187,7 +194,7 @@ const ChatCreation = () => {
               >
                 <FaArrowCircleRight size={24} />
               </Button>
-            }
+            )}
             rightSectionWidth={40}
           />
           {addFriendMutation.isError && (

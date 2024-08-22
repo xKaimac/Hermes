@@ -6,13 +6,13 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface AddFriendParams {
   friendName: string;
-  userId: string;
+  user_id: string;
 }
 
 const addFriend = async ({
   friendName,
-  userId,
-}: AddFriendParams): Promise<any> => {
+  user_id,
+}: AddFriendParams): Promise<void> => {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/friends/add-friend`,
     {
@@ -20,14 +20,14 @@ const addFriend = async ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ friendName, userId }),
+      body: JSON.stringify({ friendName, user_id }),
       credentials: "include",
     }
   );
+
   if (!response.ok) {
     throw new Error("Sorry, we can't find that user");
   }
-  return response.json();
 };
 
 const AddFriend = () => {
@@ -50,7 +50,7 @@ const AddFriend = () => {
   const handleSendRequest = (event: React.FormEvent) => {
     event.preventDefault();
     if (!friendName.trim()) return;
-    mutation.mutate({ friendName, userId: userData.user.id });
+    mutation.mutate({ friendName, user_id: userData.user.id });
   };
 
   return (
