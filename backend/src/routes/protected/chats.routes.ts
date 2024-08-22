@@ -163,6 +163,8 @@ router.post('/send-message', isAuthenticated, async (req, res) => {
     const result = await sendMessage(chat_id, sender_id, content);
     const members = await getChatMembers(chat_id);
 
+    console.log(members.members);
+
     emitNewMessage(
       members.members.map((member) => member.id),
       result

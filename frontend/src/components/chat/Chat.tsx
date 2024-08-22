@@ -11,8 +11,8 @@ const Chat = ({ selectedChat }: ChatProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const { userData, updateUserData } = useUser();
+  const [message, setMessage] = useState("");
+  const { userData } = useUser();
 
   useEffect(() => {
     if (selectedChat) {
@@ -23,7 +23,8 @@ const Chat = ({ selectedChat }: ChatProps) => {
 
     socket.emit('authenticate', { sender_id: userData.user.id });
 
-    socket.on('newMessage', (newMessage: Message) => {
+    socket.on("newMessage", (newMessage: Message) => {
+
       setMessages((prevMessages: Array<Message>) => [
         ...prevMessages,
         newMessage,
@@ -97,8 +98,8 @@ const Chat = ({ selectedChat }: ChatProps) => {
 
   const mutation = useMutation({
     mutationFn: sendMessage,
-    onSuccess: (data) => {
-      updateUserData({ status_text: data.result.status_text });
+    onSuccess: () => {
+      setMessage("");
     },
   });
 
@@ -108,11 +109,17 @@ const Chat = ({ selectedChat }: ChatProps) => {
 
   const handleClick = (event?: React.MouseEvent<HTMLButtonElement>) => {
     event?.preventDefault();
+    if (message.trim().length <= 0) {
+      setMessage("");
+      return;
+    }
+
     mutation.mutate({
       chat_id: selectedChat.chat_id,
       sender_id: userData.user.id,
       content: message,
     });
+    setMessage("");
   };
 
   const handleKeyPress = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -169,13 +176,15 @@ const Chat = ({ selectedChat }: ChatProps) => {
         </div>
         <Textarea
           autosize
-          className="mb-2 mt-2 p-2"
+          className="mt-2 mb-2 p-2"
+          id="messageBox"
           radius="xl"
           maxRows={25}
           rightSection={<EnterComponent />}
           placeholder="Type your message here"
           onChange={handleOnChange}
           onKeyPress={handleKeyPress}
+          value={message}
         />
       </div>
       {isSettingsOpen && <Settings selectedChat={selectedChat} />}

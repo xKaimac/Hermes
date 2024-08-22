@@ -1,6 +1,11 @@
 import pool from '../../config/db.config';
 import { Message } from '../../../../shared/types/Message';
 
+interface Result {
+  success: boolean;
+  created_at: number;
+}
+
 const sendMessage = async (
   chatId: number,
   userId: number,
