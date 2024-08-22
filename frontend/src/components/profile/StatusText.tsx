@@ -1,22 +1,19 @@
-import { useState } from "react";
-import { useUser } from "../../utils/UserContext";
 import { Button, Textarea } from "@mantine/core";
-import { FaArrowCircleRight } from "react-icons/fa";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { FaArrowCircleRight } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
-interface UploadData {
-  userStatus: string;
-  userId: string;
-}
+import { StatusTextUploadData } from "../../types/StatusTextUploadData"
+import { useUser } from "../../utils/UserContext";
 
 const StatusText = () => {
   const { userData, updateUserData } = useUser();
-  const userId = userData.user.id;
-  const [userStatus, setUserStatus] = useState(userData.user.status_text);
+  const user_id = userData.user.id;
+  const [status_text, setUserStatus] = useState(userData.user.status_text);
   const [isEditing, setIsEditing] = useState(false);
 
-  const updateStatusText = async ({ userStatus, userId }: UploadData) => {
+  const updateStatusText = async ({ status_text, user_id }: StatusTextUploadData) => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/user/update-status-text`,
       {
@@ -24,13 +21,13 @@ const StatusText = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userStatus, userId }),
+        body: JSON.stringify({ status_text, user_id }),
         credentials: "include",
       }
     );
-    if (!response.ok) {
-      throw new Error("Upload failed");
-    }
+
+    if (!response.ok) throw new Error("Upload failed");
+
     return response.json();
   };
 
@@ -41,17 +38,17 @@ const StatusText = () => {
     },
   });
 
-  const handleClick = (e?: any) => {
-    e?.preventDefault();
+  const handleClick = (event?: React.MouseEvent) => {
+    event?.preventDefault();
     setIsEditing(false);
-    mutation.mutate({ userStatus, userId: userId });
+    mutation.mutate({ status_text, user_id: user_id });
   };
 
-  const handleOnChange = (event: any) => {
+  const handleOnChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setUserStatus(event.target.value);
   };
 
-  const handleKeyPress = (event: any) => {
+  const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       handleClick();
@@ -75,7 +72,7 @@ const StatusText = () => {
         <>
           <div className="flex flex-row w-3/4 lg:w-1/2 xl:w-1/3 pt-5 text-center items-center justify-center">
             <p className="text-text-light-secondary dark:text-text-dark-secondary">
-              {userStatus}
+              {status_text}
             </p>
           </div>
           <Button
@@ -94,7 +91,7 @@ const StatusText = () => {
             autosize
             minRows={1}
             maxRows={8}
-            value={userStatus}
+            value={status_text}
             rightSection={<EnterComponent />}
             onChange={handleOnChange}
             onKeyPress={handleKeyPress}

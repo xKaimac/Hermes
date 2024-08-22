@@ -1,38 +1,34 @@
 import express from 'express';
+import multer from 'multer';
+
+import { ChatMember } from '../../../../shared/types/ChatMember';
 import { isAuthenticated } from '../../middleware/auth.middleware';
-import createChat from '../../services/chats/createChat.service';
+import addChatMember from '../../services/chats/addChatMember.service';
 import addChatParticipants from '../../services/chats/addChatParticipants.service';
+import createChat from '../../services/chats/createChat.service';
+import getAllMessages from '../../services/chats/getAllMessages.service';
+import getChatMembers from '../../services/chats/getChatMembers.service';
 import getChats from '../../services/chats/getChats.services';
+import getRole from '../../services/chats/getRole.service';
+import sendMessage from '../../services/chats/sendMessage.service';
+import updateChatPicture from '../../services/chats/updateChatPicture.service';
+import uploadChatPicture from '../../services/chats/uploadChatPicture.service';
 import {
   emitNewChat,
   emitNewMessage,
 } from '../../services/socket/socket.service';
-import getChatMembers from '../../services/chats/getChatMembers.service';
-import getRole from '../../services/chats/getRole.service';
-import addChatMember from '../../services/chats/addChatMember.service';
-import uploadChatPicture from '../../services/chats/uploadChatPicture.service';
-import updateChatPicture from '../../services/chats/updateChatPicture.service';
-import getAllMessages from '../../services/chats/getAllMessages.service';
-import sendMessage from '../../services/chats/sendMessage.service';
-import multer from 'multer';
-import { Message } from '../../../../shared/types/Message';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/create-chat', isAuthenticated, async (req, res) => {
   try {
-    const { chatName, filteredParticipants } = req.body;
-    const newChat = await createChat(chatName, filteredParticipants);
+    const { chat_name, members } = req.body;
+    const newChat = await createChat(chat_name, members);
 
     emitNewChat(
-      newChat.participants.map((participant) => participant.userId),
-      {
-        chatId: newChat.chatId,
-        name: newChat.name,
-        chatPicture: newChat.chatPicture,
-        mostRecentMessage: newChat.mostRecentMessage,
-      }
+      members.members.map((member: ChatMember) => member.id),
+      newChat
     );
 
     return res.status(200).json({ message: 'Chat created successfully' });
@@ -47,9 +43,9 @@ router.post('/create-chat', isAuthenticated, async (req, res) => {
 
 router.post('/add-chat-participants', isAuthenticated, async (req, res) => {
   try {
-    const { chatId, participants } = req.body;
+    const { chat_id, participants } = req.body;
 
-    await addChatParticipants(chatId, participants);
+    await addChatParticipants(chat_id, participants);
 
     return res
       .status(200)
@@ -63,12 +59,12 @@ router.post('/add-chat-participants', isAuthenticated, async (req, res) => {
 
 router.get('/get-chats', isAuthenticated, async (req, res) => {
   try {
-    const { userId } = req.query;
-    const chats = await getChats(userId);
+    const { user_id } = req.query;
+    const chats = await getChats(Number(user_id));
 
     return res
       .status(200)
-      .json({ message: 'Chats retrieved successfully', chats: chats });
+      .json({ message: 'Chats retrieved successfully', chats });
   } catch (error) {
     console.error(error);
 
@@ -78,8 +74,8 @@ router.get('/get-chats', isAuthenticated, async (req, res) => {
 
 router.post('/get-members', isAuthenticated, async (req, res) => {
   try {
-    const { chatId } = req.body;
-    const success = await getChatMembers(chatId);
+    const { chat_id } = req.body;
+    const success = await getChatMembers(chat_id);
 
     return res
       .status(200)
@@ -93,8 +89,8 @@ router.post('/get-members', isAuthenticated, async (req, res) => {
 
 router.post('/get-role', isAuthenticated, async (req, res) => {
   try {
-    const { userId, chatId } = req.body;
-    const success = await getRole(userId, chatId);
+    const { user_id, chat_id } = req.body;
+    const success = await getRole(user_id, chat_id);
 
     return res
       .status(200)
@@ -108,8 +104,8 @@ router.post('/get-role', isAuthenticated, async (req, res) => {
 
 router.post('/add-member', isAuthenticated, async (req, res) => {
   try {
-    const { chatId, friendName, userId } = req.body;
-    const success = await addChatMember(chatId, friendName, userId);
+    const { chat_id, friendName, user_id } = req.body;
+    const success = await addChatMember(chat_id, friendName, user_id);
 
     return res
       .status(200)
@@ -123,7 +119,7 @@ router.post('/add-member', isAuthenticated, async (req, res) => {
 
 router.post(
   '/upload-chat-picture',
-  upload.single('chatPicture'),
+  upload.single('chat_picture'),
   isAuthenticated,
   async (req, res) => {
     if (!req.file) {
@@ -131,10 +127,10 @@ router.post(
     }
 
     try {
-      const { chatId } = req.body;
+      const { chat_id } = req.body;
       const result: any = await uploadChatPicture(req.file);
 
-      updateChatPicture(chatId, result.secure_url);
+      updateChatPicture(chat_id, result.secure_url);
 
       return res.status(200).json({ message: 'Upload successful', result });
     } catch (error) {
@@ -145,8 +141,8 @@ router.post(
 
 router.post('/get-all-messages', isAuthenticated, async (req, res) => {
   try {
-    const { chatId } = req.body;
-    const result = await getAllMessages(chatId);
+    const { chat_id } = req.body;
+    const result = await getAllMessages(chat_id);
 
     return res
       .status(200)
@@ -163,10 +159,8 @@ router.post('/send-message', isAuthenticated, async (req, res) => {
     const result = await sendMessage(chat_id, sender_id, content);
     const members = await getChatMembers(chat_id);
 
-    console.log(members.members);
-
     emitNewMessage(
-      members.members.map((member) => member.id),
+      members.map((member) => member.id),
       result
     );
 

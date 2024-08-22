@@ -1,33 +1,25 @@
-import { useState, useEffect } from "react";
 import { Button, Textarea } from "@mantine/core";
-import { FaArrowCircleRight } from "react-icons/fa";
 import { useMutation } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { FaArrowCircleRight } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 
-interface UploadData {
-  chatName: string;
-  chatId: string;
-}
-
-interface UpdateChatNameParams {
-  chatId: string;
-  chatName: string;
-  isAdmin: boolean;
-}
+import { ChatNameUploadData } from "../../types/ChatNameUploadData";
+import { UpdateChatNameProps } from "../../types/props/UpdateChatNameProps";
 
 const UpdateChatName = ({
-  chatId,
-  chatName,
+  chat_id,
+  chat_name,
   isAdmin,
-}: UpdateChatNameParams) => {
-  const [currentChatName, setCurrentChatName] = useState(chatName);
+}: UpdateChatNameProps) => {
+  const [currentChatName, setCurrentChatName] = useState(chat_name);
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    setCurrentChatName(chatName);
-  }, [chatName]);
+    setCurrentChatName(chat_name);
+  }, [chat_name]);
 
-  const updateChatName = async ({ chatName, chatId }: UploadData) => {
+  const updateChatName = async ({ chat_name, chat_id }: ChatNameUploadData) => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/chat/update-chat-name`,
       {
@@ -35,34 +27,34 @@ const UpdateChatName = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ chatName, chatId }),
+        body: JSON.stringify({ chat_name, chat_id }),
         credentials: "include",
       }
     );
-    if (!response.ok) {
-      throw new Error("Upload failed");
-    }
+
+    if (!response.ok) throw new Error("Upload failed");
+    
     return response.json();
   };
 
   const mutation = useMutation({
     mutationFn: updateChatName,
     onSuccess: (data) => {
-      setCurrentChatName(data.chatName);
+      setCurrentChatName(data.chat_name);
     },
   });
 
-  const handleClick = (e?: any) => {
-    e?.preventDefault();
+  const handleClick = (event?: React.MouseEvent) => {
+    event?.preventDefault();
     setIsEditing(false);
-    mutation.mutate({ chatName, chatId: chatId });
+    mutation.mutate({ chat_name, chat_id: chat_id });
   };
 
-  const handleOnChange = (event: any) => {
+  const handleOnChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCurrentChatName(event.target.value);
   };
 
-  const handleKeyPress = (event: any) => {
+  const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       handleClick();

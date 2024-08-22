@@ -7,7 +7,6 @@ declare module "passport-discord" {
     displayName: string;
     email?: string;
     avatar?: string;
-    // Add other properties as needed
   }
 
   export interface StrategyOptions {

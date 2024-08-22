@@ -1,14 +1,9 @@
-import pool from '../../config/db.config';
 import { Message } from '../../../../shared/types/Message';
-
-interface Result {
-  success: boolean;
-  created_at: number;
-}
+import pool from '../../config/db.config';
 
 const sendMessage = async (
-  chatId: number,
-  userId: number,
+  chat_id: number,
+  user_id: number,
   content: string
 ): Promise<Message | undefined> => {
   const client = await pool.connect();
@@ -18,10 +13,12 @@ const sendMessage = async (
     await client.query('BEGIN;');
     const { rows } = await client.query(
       'INSERT INTO messages(chat_id, sender_id, content) VALUES($1, $2, $3) returning *',
-      [chatId, userId, content]
+      [chat_id, user_id, content]
     );
+
     await client.query('COMMIT');
     const result = rows[0];
+
     message = {
       id: result.id,
       chat_id: result.chat_id,

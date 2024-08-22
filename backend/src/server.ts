@@ -1,17 +1,18 @@
-import cors from 'cors';
-import http from 'http';
-import dotenv from 'dotenv';
-import path from 'path';
-import express from 'express';
-import passport from 'passport';
-import routes from './routes/index';
 import bodyParser from 'body-parser';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import express from 'express';
 import session from 'express-session';
+import http from 'http';
+import passport from 'passport';
+import path from 'path';
 import { Server } from 'socket.io';
-import createAllTables from './models/user.model';
-import publicRoutes from './routes/public.routes';
-import { isAuthenticated } from './middleware/auth.middleware';
+
 import { configurePassport } from './config/passport.config';
+import { isAuthenticated } from './middleware/auth.middleware';
+import createAllTables from './models/user.model';
+import routes from './routes/index';
+import publicRoutes from './routes/public.routes';
 import { initializeSocket } from './services/socket/socket.service';
 
 dotenv.config({ path: path.resolve(__dirname, '../.env') });

@@ -1,24 +1,25 @@
+import { Popover, TextInput } from "@mantine/core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { Popover, TextInput } from "@mantine/core";
+
 import { useUser } from "../../utils/UserContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface AddMemberParams {
   friendName: string;
-  chatId: number;
-  userId: number;
+  chat_id: number;
+  user_id: number;
 }
 
 interface AddChatMemberProps {
-  chatId: number;
+  chat_id: number;
 }
 
 const addChatMember = async ({
-  chatId,
+  chat_id,
   friendName,
-  userId,
-}: AddMemberParams): Promise<any> => {
+  user_id,
+}: AddMemberParams): Promise<void> => {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/chats/add-member`,
     {
@@ -26,27 +27,23 @@ const addChatMember = async ({
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ chatId, friendName, userId }),
+      body: JSON.stringify({ chat_id, friendName, user_id }),
       credentials: "include",
     }
   );
 
-  if (!response.ok) {
-    throw new Error(
+  if (!response.ok) throw new Error(
       "Sorry, we can't find that user or they're not on your friends list"
     );
-  }
-
-  return response.json();
 };
 
-const AddChatMember = ({ chatId }: AddChatMemberProps) => {
+const AddChatMember = ({ chat_id }: AddChatMemberProps) => {
   const [opened, setOpened] = useState(false);
   const [friendName, setFriendName] = useState("");
   const { userData } = useUser();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<any, Error, AddMemberParams>({
+  const mutation = useMutation({
     mutationFn: addChatMember,
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -59,9 +56,10 @@ const AddChatMember = ({ chatId }: AddChatMemberProps) => {
 
   const handleSendRequest = (event: React.FormEvent) => {
     event.preventDefault();
+
     if (!friendName.trim()) return;
-    console.log(chatId);
-    mutation.mutate({ chatId: chatId, friendName, userId: userData.user.id });
+
+    mutation.mutate({ chat_id: chat_id, friendName, user_id: userData.user.id });
   };
 
   return (

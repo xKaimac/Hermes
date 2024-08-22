@@ -1,12 +1,10 @@
 import { IconType } from 'react-icons';
-import { FcGoogle } from 'react-icons/fc';
 import { FaDiscord, FaGithub } from 'react-icons/fa';
+import { FcGoogle } from 'react-icons/fc';
 
-type Provider = {
-  name: string;
-};
+import { AuthProvider } from '../../types/AuthProvider';
 
-const LoginButton = ({ name }: Provider) => {
+const LoginButton = ({ name }: AuthProvider) => {
   const getAuthURL = (): string => {
     const AUTH_URL = import.meta.env.VITE_BACKEND_URL;
 

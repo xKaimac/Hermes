@@ -1,13 +1,8 @@
+import { FriendsListData } from '../../../../shared/types/FriendsListData';
+import { User } from '../../../../shared/types/User';
 import pool from '../../config/db.config';
-import { Friend } from '../../../../shared/types/Friend';
 
-interface FriendsResult {
-  confirmedFriends: Friend[];
-  outgoingRequests: Friend[];
-  incomingRequests: Friend[];
-}
-
-const getFriends = async (userId: string): Promise<FriendsResult> => {
+const getFriends = async (user_id: number): Promise<FriendsListData> => {
   const client = await pool.connect();
 
   try {
@@ -21,16 +16,16 @@ const getFriends = async (userId: string): Promise<FriendsResult> => {
        JOIN users u1 ON f.user_id = u1.id
        JOIN users u2 ON f.friend_id = u2.id
        WHERE f.user_id = $1 OR f.friend_id = $1`,
-      [userId]
+      [user_id]
     );
 
-    const confirmedFriends: Friend[] = [];
-    const outgoingRequests: Friend[] = [];
-    const incomingRequests: Friend[] = [];
+    const confirmedFriends: User[] = [];
+    const outgoingRequests: User[] = [];
+    const incomingRequests: User[] = [];
 
     friendships.forEach((friendship) => {
-      const isInitiator = friendship.user_id === userId;
-      const friendData: Friend = {
+      const isInitiator = friendship.user_id === user_id;
+      const friendData: User = {
         id: isInitiator ? friendship.friend_id : friendship.user_id,
         username: isInitiator
           ? friendship.friend_username
@@ -38,10 +33,10 @@ const getFriends = async (userId: string): Promise<FriendsResult> => {
         status: isInitiator
           ? friendship.friend_status_type
           : friendship.user_status_type,
-        statusText: isInitiator
+        status_text: isInitiator
           ? friendship.friend_status_text
           : friendship.user_status_text,
-        profilePicture: isInitiator
+        profile_picture: isInitiator
           ? friendship.friend_profile_picture
           : friendship.user_profile_picture,
       };

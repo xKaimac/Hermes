@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Request, Response } from 'express';
 
 export const isAuthenticated = (
   req: Request,
@@ -8,5 +8,5 @@ export const isAuthenticated = (
   if (req.isAuthenticated()) {
     return next();
   }
-  res.status(401).json({ message: "Unauthorized: Please log in" });
+  res.status(401).json({ message: 'Unauthorized: Please log in' });
 };

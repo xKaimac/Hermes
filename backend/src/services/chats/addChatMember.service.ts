@@ -11,9 +11,9 @@ const addChatMember = async (
   const role = 'regular';
 
   const friend = await findFriend(user_id, friendName);
-  const friendId: string | undefined = friend.friendData?.id;
+  const friend_id: number | undefined = friend?.id;
 
-  if (!friendId) {
+  if (!friend_id) {
     return result;
   }
 
@@ -21,7 +21,7 @@ const addChatMember = async (
     await client.query('BEGIN;');
     await client.query(
       'INSERT INTO chat_participants (user_id, chat_id, role) VALUES ($1, $2, $3)',
-      [friendId, chat_id, role]
+      [friend_id, chat_id, role]
     );
     await client.query('COMMIT');
     result = true;

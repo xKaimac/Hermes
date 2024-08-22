@@ -1,8 +1,9 @@
+import { Popover, TextInput } from "@mantine/core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { FaPlus, FaUserFriends } from "react-icons/fa";
-import { Popover, TextInput } from "@mantine/core";
+
 import { useUser } from "../../utils/UserContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface AddFriendParams {
   friendName: string;
@@ -25,9 +26,7 @@ const addFriend = async ({
     }
   );
 
-  if (!response.ok) {
-    throw new Error("Sorry, we can't find that user");
-  }
+  if (!response.ok) throw new Error("Sorry, we can't find that user");
 };
 
 const AddFriend = () => {
@@ -36,7 +35,7 @@ const AddFriend = () => {
   const { userData } = useUser();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation<any, Error, AddFriendParams>({
+  const mutation = useMutation({
     mutationFn: addFriend,
     onSuccess: () => {
       queryClient.invalidateQueries({

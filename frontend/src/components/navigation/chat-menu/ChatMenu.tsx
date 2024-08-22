@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
-import { useUser } from "../../../utils/UserContext";
 import { Avatar, ScrollArea, TextInput } from "@mantine/core";
-import ChatCreation from "./ChatCreation";
+import { useState, useEffect } from "react";
 import io from "socket.io-client";
-import { ChatValues } from "../../../types/ChatValues";
+
+import { ChatValues } from "../../../../../shared/types/ChatValues";
+import { useUser } from "../../../utils/UserContext";
+
+import ChatCreation from "./ChatCreation";
 
 interface ChatMenuProps {
   onChatSelect: (chat: ChatValues) => void;
@@ -16,19 +18,20 @@ const ChatMenu = ({ onChatSelect, onProfileClick }: ChatMenuProps) => {
   const [isLoadingChats, setIsLoadingChats] = useState(true);
   const [error, setError] = useState(null);
 
-  const getChats = async (userId: string): Promise<ChatValues[]> => {
+  const getChats = async (user_id: string): Promise<ChatValues[]> => {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-chats?userId=${userId}`,
+      `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-chats?user_id=${user_id}`,
       {
         method: "GET",
         credentials: "include",
       }
     );
-    if (!response.ok) {
-      throw new Error("Failed to fetch chats");
-    }
+
+    if (!response.ok) throw new Error("Failed to fetch chats");
+    
     const data = await response.json();
-    return data.chats.chats;
+
+    return data.chats;
   };
 
   useEffect(() => {
@@ -36,7 +39,7 @@ const ChatMenu = ({ onChatSelect, onProfileClick }: ChatMenuProps) => {
       if (userData && userData.isAuthenticated) {
         try {
           const fetchedChats = await getChats(userData.user.id);
-          console.log(fetchedChats);
+
           setChats(fetchedChats);
         } catch (err) {
           setError("Failed to load chats. Please try again later.");
@@ -51,7 +54,7 @@ const ChatMenu = ({ onChatSelect, onProfileClick }: ChatMenuProps) => {
 
     const socket = io(`${import.meta.env.VITE_BACKEND_URL}`);
 
-    socket.emit("authenticate", { userId: userData.user.id });
+    socket.emit("authenticate", { user_id: userData.user.id });
 
     socket.on("newChat", (newChat: ChatValues) => {
       setChats((prevChats: Array<ChatValues>) => [...prevChats, newChat]);
@@ -92,11 +95,11 @@ const ChatMenu = ({ onChatSelect, onProfileClick }: ChatMenuProps) => {
         <ul>
           {chats.map((chat: ChatValues) => (
             <li
-              key={chat.chatId}
+              key={chat.id}
               className="flex flex-row mt-2 mb-2 cursor-pointer"
               onClick={() => onChatSelect(chat)}
             >
-              <Avatar radius="xl" size="lg" src={chat.chatPicture} />
+              <Avatar radius="xl" size="lg" src={chat.chat_picture} />
               <div className="pl-2 overflow-hidden mt-auto mb-auto">
                 <a className="block truncate">{chat.name}</a>
                 <p className="truncate text-sm text-gray-500">

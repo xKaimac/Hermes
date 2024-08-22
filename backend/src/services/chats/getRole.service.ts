@@ -1,32 +1,27 @@
-import pool from "../../config/db.config";
+import pool from '../../config/db.config';
 
-interface Result {
-  success: boolean;
-  role: string;
-}
-
-const getRole = async (userId: any, chatId: any): Promise<Result> => {
+const getRole = async (user_id: number, chat_id: number): Promise<string> => {
   const client = await pool.connect();
-  const result = { success: false, role: "regular" };
+  let role = 'regular';
 
   try {
-    await client.query("BEGIN;");
+    await client.query('BEGIN;');
     const { rows } = await client.query(
-      "SELECT role FROM chat_participants WHERE (user_id = $1 AND chat_id = $2)",
-      [userId, chatId]
+      'SELECT role FROM chat_participants WHERE (user_id = $1 AND chat_id = $2)',
+      [user_id, chat_id]
     );
-    await client.query("COMMIT");
-    result.success = true;
-    result.role = rows[0].role;
+
+    await client.query('COMMIT');
+
+    role = rows[0].role;
   } catch (error) {
     console.log(error);
-    await client.query("ROLLBACK");
-    result.success = false;
+    await client.query('ROLLBACK');
   } finally {
     client.release();
   }
 
-  return result;
+  return role;
 };
 
 export default getRole;

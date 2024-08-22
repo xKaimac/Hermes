@@ -1,22 +1,10 @@
-import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as DiscordStrategy } from "passport-discord";
-import { Strategy as GitHubStrategy } from "passport-github2";
-import { findUserById } from "../services/user/user.service";
-import findOrCreateUser from "../services/user/user.service";
+import passport from 'passport';
+import { Strategy as DiscordStrategy } from 'passport-discord';
+import { Strategy as GitHubStrategy } from 'passport-github2';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
-interface StrategyConfig {
-  clientID: string;
-  clientSecret: string;
-  callbackURL: string;
-  scope?: string[];
-}
-
-interface PassportConfig {
-  google: StrategyConfig;
-  discord: StrategyConfig;
-  github: StrategyConfig;
-}
+import { PassportConfig } from '../../types/PassportConfig';
+import findOrCreateUser, { findUserById } from '../services/user/user.service';
 
 export const configurePassport = (config: PassportConfig) => {
   // Google Strategy
@@ -26,19 +14,15 @@ export const configurePassport = (config: PassportConfig) => {
         clientID: config.google.clientID,
         clientSecret: config.google.clientSecret,
         callbackURL: config.google.callbackURL,
-        scope: config.google.scope || ["profile"],
+        scope: config.google.scope || ['profile'],
       },
-      async (
-        accessToken: string,
-        refreshToken: string,
-        profile: any,
-        done: any
-      ) => {
+      async (profile: any, done: any) => {
         try {
           const { user, isFirstLogin } = await findOrCreateUser(
-            "google",
+            'google',
             profile
           );
+
           done(null, { ...user, isFirstLogin });
         } catch (error) {
           done(error as Error);
@@ -54,19 +38,15 @@ export const configurePassport = (config: PassportConfig) => {
         clientID: config.discord.clientID,
         clientSecret: config.discord.clientSecret,
         callbackURL: config.discord.callbackURL,
-        scope: config.discord.scope || ["identify"],
+        scope: config.discord.scope || ['identify'],
       },
-      async (
-        accessToken: string,
-        refreshToken: string,
-        profile: any,
-        done: any
-      ) => {
+      async (profile: any, done: any) => {
         try {
           const { user, isFirstLogin } = await findOrCreateUser(
-            "discord",
+            'discord',
             profile
           );
+
           done(null, { ...user, isFirstLogin });
         } catch (error) {
           done(error as Error);
@@ -82,19 +62,15 @@ export const configurePassport = (config: PassportConfig) => {
         clientID: config.github.clientID,
         clientSecret: config.github.clientSecret,
         callbackURL: config.github.callbackURL,
-        scope: config.github.scope || ["read:user"],
+        scope: config.github.scope || ['read:user'],
       },
-      async (
-        accessToken: string,
-        refreshToken: string,
-        profile: any,
-        done: any
-      ) => {
+      async (profile: any, done: any) => {
         try {
           const { user, isFirstLogin } = await findOrCreateUser(
-            "github",
+            'github',
             profile
           );
+
           done(null, { ...user, isFirstLogin });
         } catch (error) {
           done(error as Error);
@@ -110,6 +86,7 @@ export const configurePassport = (config: PassportConfig) => {
   passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await findUserById(id);
+
       done(null, user);
     } catch (error) {
       done(error as Error);

@@ -1,23 +1,16 @@
 import { Button, Avatar } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-interface UploadData {
-  file: File;
-  chatId: string;
-}
+import { ChatPictureUploadData } from "../../types/ChatPictureUploadData";
+import { ChatPictureUploadProps } from "../../types/props/ChatPictureUploadProps";
 
-interface ChatPictureUploadParams {
-  isAdmin: boolean;
-  chatId: string;
-  chatPicture: string;
-}
-
-const uploadChatPicture = async ({ file, chatId }: UploadData) => {
+const uploadChatPicture = async ({ file, chat_id }: ChatPictureUploadData) => {
   const formData = new FormData();
-  formData.append("profilePicture", file);
-  formData.append("chatId", chatId);
+
+  formData.append("chat_picture", file);
+  formData.append("chat_id", chat_id);
+
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/chats/upload-chat-picture`,
     {
@@ -26,40 +19,43 @@ const uploadChatPicture = async ({ file, chatId }: UploadData) => {
       credentials: "include",
     }
   );
-  if (!response.ok) {
-    throw new Error("Upload failed");
-  }
-  return response.json();
+  
+  if (!response.ok) throw new Error("Upload failed");
+
+  const data = await response.json();
+  
+  return data.chat_picture;
 };
 
 const ChatPictureUpload = ({
   isAdmin,
-  chatId,
-  chatPicture,
-}: ChatPictureUploadParams) => {
-  const [currentPicture, setCurrentPicture] = useState(chatPicture);
+  chat_id,
+  chat_picture,
+}: ChatPictureUploadProps) => {
+  const [currentChatPicture, setCurrentChatPicture] = useState(chat_picture);
 
   useEffect(() => {
-    setCurrentPicture(chatPicture);
-  }, [chatPicture]);
+    setCurrentChatPicture(chat_picture);
+  }, [chat_picture]);
 
   const mutation = useMutation({
     mutationFn: uploadChatPicture,
-    onSuccess: (data) => {
-      setCurrentPicture(data.chatPicture);
+    onSuccess: (chat_picture) => {
+      setCurrentChatPicture(chat_picture);
     },
   });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      mutation.mutate({ file, chatId });
+
+      mutation.mutate({ file, chat_id });
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center pt-5">
-      <Avatar className="size-[20vh]" src={currentPicture} />
+      <Avatar className="size-[20vh]" src={currentChatPicture} />
       <input
         type="file"
         onChange={handleFileChange}

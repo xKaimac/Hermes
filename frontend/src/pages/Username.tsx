@@ -1,7 +1,8 @@
-import { useState } from "react";
 import { Button, TextInput } from "@mantine/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+
 import BackgroundWithAnimation from "../components/layouts/BackgroundAnimation";
 
 const Username = () => {
@@ -18,9 +19,9 @@ const Username = () => {
           credentials: "include",
         }
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch user status");
-      }
+
+      if (!response.ok) throw new Error("Failed to fetch user status");
+      
       return response.json();
     },
   });
@@ -37,14 +38,14 @@ const Username = () => {
           },
           body: JSON.stringify({
             username: newUsername,
-            userId: userData.user.id,
+            user_id: userData.user.id,
           }),
           credentials: "include",
         }
       );
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
+
+      if (!response.ok) throw new Error("Network response was not ok");
+      
       return response.json();
     },
     onSuccess: (data) => {
@@ -71,6 +72,7 @@ const Username = () => {
 
   if (!userData?.isAuthenticated) {
     navigate({ to: "/login" });
+
     return null;
   }
 

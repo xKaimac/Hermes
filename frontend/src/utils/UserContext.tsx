@@ -1,9 +1,7 @@
-import { createContext, useContext } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { createContext, useContext } from "react";
 
-type AppLayoutProps = {
-  children: JSX.Element;
-};
+import { AppLayoutProps } from "../types/props/AppLayoutProps";
 
 const UserContext = createContext(undefined);
 
@@ -23,9 +21,9 @@ export const UserProvider = ({ children }: AppLayoutProps) => {
           credentials: "include",
         }
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch user status");
-      }
+
+      if (!response.ok) throw new Error("Failed to fetch user status");
+
       return response.json();
     },
     staleTime: 5 * 60 * 1000,
@@ -35,6 +33,7 @@ export const UserProvider = ({ children }: AppLayoutProps) => {
   const updateUserData = (newData: Partial<any>) => {
     queryClient.setQueryData(["userStatus"], (oldData: any) => {
       if (!oldData) return oldData;
+
       return {
         ...oldData,
         user: { ...oldData.user, ...newData },
@@ -53,8 +52,10 @@ export const UserProvider = ({ children }: AppLayoutProps) => {
 
 export const useUser = () => {
   const context = useContext(UserContext);
+
   if (context === undefined) {
     throw new Error("useUser must be used within a UserProvider");
   }
+
   return context;
 };

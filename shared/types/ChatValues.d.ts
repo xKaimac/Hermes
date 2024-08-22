@@ -1,6 +1,6 @@
 export interface ChatValues {
-  chatId: number;
+  id: number;
   name: string;
-  chatPicture?: string;
+  chat_picture?: string;
   mostRecentMessage?: string;
 }

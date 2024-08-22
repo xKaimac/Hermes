@@ -1,6 +1,6 @@
+import { User } from '../../../../shared/types/User';
 import pool from '../../config/db.config';
 import { findUserByName } from '../user/user.service';
-import { User } from '../../../../shared/types/User';
 
 const findFriend = async (
   user_id: number,
@@ -28,6 +28,7 @@ const findFriend = async (
     }
   } catch (error) {
     await client.query('ROLLBACK');
+
     return null;
   } finally {
     client.release();

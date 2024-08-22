@@ -1,24 +1,22 @@
+import { Avatar, ScrollArea } from "@mantine/core";
 import { useState, useEffect } from "react";
+
+import { ChatMember } from "../../../../shared/types/ChatMember";
+import { SettingsProps } from "../../types/props/SettingsProps";
 import ThemeToggle from "../../utils/theme-toggle.util";
-import { ChatValues } from "../../types/ChatValues";
-import { Avatar, ScrollArea, TextInput } from "@mantine/core";
-import { ChatMember } from "../../types/ChatMember";
-import AddChatMember from "./AddChatMember";
 import { useUser } from "../../utils/UserContext";
+
+import AddChatMember from "./AddChatMember";
 import ChatPictureUpload from "./ChatPictureUpload";
 import UpdateChatName from "./UpdateChatName";
-
-interface SettingsProps {
-  selectedChat: ChatValues | null;
-}
 
 const Settings = ({ selectedChat }: SettingsProps) => {
   const [members, setMembers] = useState(new Array<ChatMember>());
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const { userData } = useUser();
-  const userId = userData.user.id;
+  const user_id = userData.user.id;
 
   useEffect(() => {
     if (selectedChat) {
@@ -34,8 +32,9 @@ const Settings = ({ selectedChat }: SettingsProps) => {
       setIsLoading(true);
       setError(null);
 
-      const role = await getRoleStatus(selectedChat.chatId, userId);
-      setIsAdmin(role.result.role === "admin");
+      const role = await getRoleStatus(selectedChat.id, user_id);
+
+      setIsAdmin(role === "admin");
     } catch (err) {
       setError("Failed to fetch chat members");
       console.error(err);
@@ -51,7 +50,8 @@ const Settings = ({ selectedChat }: SettingsProps) => {
     setError(null);
 
     try {
-      const chatMembers = await getChatMembers(selectedChat.chatId);
+      const chatMembers = await getChatMembers(selectedChat.id);
+
       setMembers(chatMembers.result.members);
     } catch (err) {
       setError("Failed to fetch chat members");
@@ -61,7 +61,7 @@ const Settings = ({ selectedChat }: SettingsProps) => {
     }
   };
 
-  const getChatMembers = async (chatId: number) => {
+  const getChatMembers = async (chat_id: number) => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-members`,
       {
@@ -69,19 +69,17 @@ const Settings = ({ selectedChat }: SettingsProps) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ chatId }),
+        body: JSON.stringify({ chat_id }),
         credentials: "include",
       }
     );
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch chats");
-    }
+    if (!response.ok) throw new Error("Failed to fetch chats");
 
     return response.json();
   };
 
-  const getRoleStatus = async (chatId: number, userId: number) => {
+  const getRoleStatus = async (chat_id: number, user_id: number) => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-role`,
       {
@@ -89,16 +87,16 @@ const Settings = ({ selectedChat }: SettingsProps) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ chatId, userId }),
+        body: JSON.stringify({ chat_id, user_id }),
         credentials: "include",
       }
     );
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch chats");
-    }
+    if (!response.ok) throw new Error("Failed to fetch chats");
 
-    return response.json();
+    const data = await response.json();
+
+    return data.role;
   };
 
   const formatTimestamp = (timestamp: number) => {
@@ -118,12 +116,12 @@ const Settings = ({ selectedChat }: SettingsProps) => {
             <div className="flex-shrink-0 relative flex flex-col items-center justify-center py-4">
               <ChatPictureUpload
                 isAdmin={isAdmin}
-                chatId={selectedChat?.chatId.toString() || ""}
-                chatPicture={selectedChat?.chatPicture || ""}
+                chat_id={selectedChat?.id}
+                chat_picture={selectedChat?.chat_picture}
               />
               <UpdateChatName
-                chatId={selectedChat?.chatId.toString() || ""}
-                chatName={selectedChat?.name || ""}
+                chat_id={selectedChat.id}
+                chat_name={selectedChat?.name}
                 isAdmin={isAdmin}
               />
               <div className="absolute top-2 right-2">
@@ -136,7 +134,7 @@ const Settings = ({ selectedChat }: SettingsProps) => {
                 <h2 className="text-xl font-semibold text-text-light-primary dark:text-text-dark-primary">
                   Members
                 </h2>
-                {isAdmin && <AddChatMember chatId={selectedChat.chatId} />}
+                {isAdmin && <AddChatMember chat_id={selectedChat.id} />}
               </div>
               <ScrollArea className="flex-grow">
                 <ul className="divide-y divide-text-light-secondary/25 dark:divide-text-light-secondary/75 px-4">
@@ -145,7 +143,7 @@ const Settings = ({ selectedChat }: SettingsProps) => {
                     members.map((member: ChatMember) => (
                       <li key={member.id} className="flex items-center py-4">
                         <Avatar
-                          src={member.profilePicture}
+                          src={member.profile_picture}
                           alt={member.username}
                           className="h-10 w-10"
                         />
@@ -154,7 +152,7 @@ const Settings = ({ selectedChat }: SettingsProps) => {
                             {member.username}
                           </p>
                           <p className="truncate text-xs text-text-light-secondary dark:text-text-dark-secondary">
-                            Member since {formatTimestamp(member.memberSince)}
+                            {member.joined_at && (`Member since ${formatTimestamp(member.joined_at)}`)}
                           </p>
                         </div>
                       </li>

@@ -1,46 +1,43 @@
-import pool from "../../config/db.config";
-import { ChatParticipants } from "../../../types/ChatParticipants";
-import addChatParticipants from "./addChatParticipants.service";
-import { Chat } from "../../../types/Chat";
-
-interface Result extends Chat {
-  success: boolean;
-  participants: Array<ChatParticipants>;
-}
+import { ChatMember } from '../../../../shared/types/ChatMember';
+import { ChatValues } from '../../../../shared/types/ChatValues';
+import pool from '../../config/db.config';
+import addChatParticipants from './addChatParticipants.service';
 
 const createChat = async (
-  chatName: string,
-  participants: Array<ChatParticipants>
-): Promise<Result> => {
+  name: string,
+  members: Array<ChatMember>
+): Promise<ChatValues> => {
   const client = await pool.connect();
-  let result: Result = {
-    success: false,
-    participants: new Array<ChatParticipants>(),
-  };
 
   try {
-    await client.query("BEGIN;");
+    await client.query('BEGIN;');
+
     const { rows } = await client.query(
-      "INSERT INTO chats(name) VALUES($1) RETURNING *",
-      [chatName]
+      'INSERT INTO chats(name) VALUES($1) RETURNING *',
+      [name]
     );
+
     const chat = rows[0];
-    await client.query("COMMIT");
-    result.success = await addChatParticipants(chat.id, participants);
-    result.participants = participants;
-    result.chatId = chat.id;
-    result.name = chat.name;
-    result.chatPicture = chat.chat_picture;
-    result.mostRecentMessage = "";
+
+    if (!chat) throw new Error('Failed to create chat');
+
+    await client.query('COMMIT');
+    await addChatParticipants(chat.id, members);
+
+    const newChat = {
+      id: chat.id,
+      name: chat.name,
+      chat_picture: chat.chat_picture,
+    };
+
+    return newChat;
   } catch (error) {
-    console.log(error);
-    await client.query("ROLLBACK");
-    result.success = false;
+    console.error(error);
+    await client.query('ROLLBACK');
+    throw error;
   } finally {
     client.release();
   }
-
-  return result;
 };
 
 export default createChat;

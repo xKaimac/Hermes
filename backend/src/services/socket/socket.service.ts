@@ -1,22 +1,25 @@
-import { Server } from "socket.io";
+import { Server } from 'socket.io';
+
+import { ChatValues } from '../../../../shared/types/ChatValues';
+import { Message } from '../../../../shared/types/Message';
 
 let io: Server;
-const userSocketMap = new Map<string, string>();
+const userSocketMap = new Map<number, string>();
 
 export const initializeSocket = (socketIo: Server) => {
   io = socketIo;
 
-  io.on("connection", (socket) => {
-    socket.on("authenticate", (data: { userId: string }) => {
-      userSocketMap.set(data.userId, socket.id);
-      socket.join(data.userId);
+  io.on('connection', (socket) => {
+    socket.on('authenticate', (data: { user_id: number }) => {
+      userSocketMap.set(data.user_id, socket.id);
+      socket.join(data.user_id.toString());
     });
 
-    socket.on("disconnect", () => {
-      for (const [userId, socketId] of userSocketMap.entries()) {
+    socket.on('disconnect', () => {
+      for (const [user_id, socketId] of userSocketMap.entries()) {
         if (socketId === socket.id) {
-          userSocketMap.delete(userId);
-          socket.leave(userId);
+          userSocketMap.delete(user_id);
+          socket.leave(user_id.toString());
           break;
         }
       }
@@ -24,21 +27,21 @@ export const initializeSocket = (socketIo: Server) => {
   });
 };
 
-export const emitFriendRequest = (recipientId: string, senderId: string) => {
-  io.to(recipientId).emit("friendRequest", {
-    type: "friendRequest",
+export const emitFriendRequest = (recipientId: number, senderId: string) => {
+  io.to(recipientId.toString()).emit('friendRequest', {
+    type: 'friendRequest',
     senderId: senderId,
   });
 };
 
-export const emitNewChat = (participants: string[], chatData: any) => {
-  participants.forEach((userId) => {
-    io.to(userId).emit("newChat", chatData);
+export const emitNewChat = (members: number[], chatData: ChatValues) => {
+  members.forEach((user_id) => {
+    io.to(user_id.toString()).emit('newChat', chatData);
   });
 };
 
-export const emitNewMessage = (participants: string[], messageData: any) => {
-  participants.forEach((userId) => {
-    io.to(userId).emit("newMessage", messageData);
+export const emitNewMessage = (members: number[], messageData: Message) => {
+  members.forEach((user_id) => {
+    io.to(user_id.toString()).emit('newMessage', messageData);
   });
 };

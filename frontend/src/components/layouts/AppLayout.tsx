@@ -1,8 +1,5 @@
+import {AppLayoutProps} from '../../types/props/AppLayoutProps'
 import ChatPage from '../chat/ChatPage';
-
-type AppLayoutProps = {
-  children: JSX.Element;
-};
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   return (

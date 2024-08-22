@@ -1,9 +1,9 @@
 import pool from '../../config/db.config';
 import handleFriendRequest from './handleFriendRequest.service';
 
-const getFriendId = async (friendName: string): Promise<string | undefined> => {
+const getFriendId = async (friendName: string): Promise<number | undefined> => {
   const client = await pool.connect();
-  let friendId: string | undefined;
+  let friend_id: number | undefined;
 
   try {
     await client.query('BEGIN');
@@ -13,7 +13,7 @@ const getFriendId = async (friendName: string): Promise<string | undefined> => {
     );
 
     if (rows.length > 0) {
-      friendId = rows[0].id;
+      friend_id = rows[0].id;
     }
     await client.query('COMMIT');
   } catch (error) {
@@ -22,29 +22,29 @@ const getFriendId = async (friendName: string): Promise<string | undefined> => {
     client.release();
   }
 
-  return friendId;
+  return friend_id;
 };
 
 const getRequestStatus = async (
-  userId: string,
-  friendId: string
+  user_id: number,
+  friend_id: number
 ): Promise<string | undefined> => {
   const client = await pool.connect();
   const accepted = 'accepted';
-  let requestStatus: string | undefined;
+  let status: string | undefined;
 
   try {
     await client.query('BEGIN');
     const { rows } = await client.query(
       'SELECT status FROM friends WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)',
-      [userId, friendId]
+      [user_id, friend_id]
     );
 
     if (rows.length > 0) {
-      requestStatus = rows[0].status;
-      if (requestStatus === 'pending') {
-        await handleFriendRequest(accepted, userId, friendId);
-        requestStatus = accepted;
+      status = rows[0].status;
+      if (status === 'pending') {
+        await handleFriendRequest(accepted, user_id, friend_id);
+        status = accepted;
       }
     }
     await client.query('COMMIT');
@@ -54,30 +54,30 @@ const getRequestStatus = async (
     client.release();
   }
 
-  return requestStatus;
+  return status;
 };
 
 const sendFriendRequest = async (
-  userId: string,
+  user_id: number,
   friendName: string
-): Promise<{ success: boolean; friendId: string }> => {
+): Promise<{ success: boolean; friend_id: number }> => {
   const client = await pool.connect();
-  const friendId: string | undefined = await getFriendId(friendName);
-  const success: { success: boolean; friendId: string } = {
+  const friend_id: number | undefined = await getFriendId(friendName);
+  const success: { success: boolean; friend_id: number } = {
     success: false,
-    friendId: '',
+    friend_id: 0,
   };
-  let requestStatus: string | undefined;
+  let status: string | undefined;
 
-  if (!friendId) {
+  if (!friend_id) {
     return success;
   }
 
-  requestStatus = await getRequestStatus(userId, friendId);
+  status = await getRequestStatus(user_id, friend_id);
 
-  if (!requestStatus) {
-    requestStatus = 'pending';
-  } else if (requestStatus === 'accepted') {
+  if (!status) {
+    status = 'pending';
+  } else if (status === 'accepted') {
     success.success = true;
 
     return success;
@@ -87,7 +87,7 @@ const sendFriendRequest = async (
     await client.query('BEGIN;');
     await client.query(
       'INSERT INTO friends (user_id, friend_id, status) VALUES ($1, $2, $3)',
-      [userId, friendId, requestStatus]
+      [user_id, friend_id, status]
     );
     await client.query('COMMIT');
     success.success = true;

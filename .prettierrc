@@ -15,9 +15,19 @@
   "endOfLine": "lf",
   "embeddedLanguageFormatting": "auto",
   "singleAttributePerLine": false,
-  "importOrder": ["^@core/(.*)$", "^@server/(.*)$", "^@ui/(.*)$", "^[./]"],
+  "importOrder": [
+    "^react",
+    "^@?\\w",
+    "^(@|components)(/.*|$)",
+    "^(@|pages)(/.*|$)",
+    "^(@|hooks)(/.*|$)",
+    "^(@|utils)(/.*|$)",
+    "^[./]"
+  ],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
-  "plugins": ["prettier-plugin-tailwindcss"],
-  "jsxBracketSameLine": false,
+  "plugins": [
+    "@trivago/prettier-plugin-sort-imports",
+    "prettier-plugin-tailwindcss"
+  ]
 }

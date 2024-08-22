@@ -1,4 +1,4 @@
-import './BackgroundAnimation.styles.scss';
+import './styles/BackgroundAnimation.styles.scss';
 
 const BackgroundWithAnimation = () => {
   return (

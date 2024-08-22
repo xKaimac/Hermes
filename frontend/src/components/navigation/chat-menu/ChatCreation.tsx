@@ -6,63 +6,34 @@ import {
   Text,
   Avatar,
 } from "@mantine/core";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { FaArrowCircleRight, FaPlus, FaTimes } from "react-icons/fa";
-import { useUser } from "../../../utils/UserContext";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+import { ChatMember } from "../../../../../shared/types/ChatMember";
 import { User } from "../../../../../shared/types/User";
-
-// This is the format the backend returns the friends as
-interface Friend {
-  id: string;
-  username: string;
-  profilePicture: string;
-}
-
-interface Participant extends Friend {
-  role: "admin" | "regular";
-}
-
-interface CreateChatParams {
-  chatName: string;
-  participants: Participant[];
-}
-
-// This is the format the database expects it to be in
-interface FilteredParticipant {
-  userId: string;
-  role: "admin" | "regular";
-}
+import { CreateChatParams} from "../../../types/props/ChatCreationProps";
+import { useUser } from "../../../utils/UserContext";
 
 const createChat = async ({
-  chatName,
-  participants,
-}: CreateChatParams): Promise<any> => {
-  const filteredParticipants: FilteredParticipant[] = participants.map(
-    ({ id, role }) => ({
-      userId: id,
-      role,
-    })
-  );
+  chat_name,
+  members,
+}: CreateChatParams): Promise<void> => {
 
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/chats/create-chat`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chatName, filteredParticipants }),
+      body: JSON.stringify({ chat_name, members }),
       credentials: "include",
     }
   );
 
-  if (!response.ok) {
-    throw new Error("Failed to create chat");
-  }
-
-  return response.json();
+  if (!response.ok) throw new Error("Failed to create chat");
 };
 
-const addFriend = async (friendName: string): Promise<User> => {
+const addMember = async (friendName: string): Promise<User> => {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/friends/find-friend`,
     {
@@ -73,9 +44,7 @@ const addFriend = async (friendName: string): Promise<User> => {
     }
   );
 
-  if (!response.ok) {
-    throw new Error("Friend not found");
-  }
+  if (!response.ok) throw new Error("User not found");
 
   const data = await response.json();
 
@@ -84,18 +53,17 @@ const addFriend = async (friendName: string): Promise<User> => {
 
 const ChatCreation = () => {
   const [isCreatingChat, setIsCreatingChat] = useState(false);
-  const [friendName, setFriendName] = useState("");
-  const [chatName, setChatName] = useState("");
+  const [memberName, setMemberName] = useState("");
+  const [chat_name, setChatName] = useState("");
   const { userData } = useUser();
   const queryClient = useQueryClient();
-  const [participants, setParticipants] = useState([
-    {
-      id: userData.user.id,
-      username: userData.user.username,
-      profilePicture: userData.user.profilePicture,
-      role: "admin",
-    },
-  ]);
+  const user: ChatMember = {
+    id: userData.user.id,
+    username: userData.user.username,
+    profile_picture: userData.user.profilePicture,
+    role: "admin",
+  }
+  const [members, setParticipants] = useState([user]);
 
   const createChatMutation = useMutation({
     mutationFn: createChat,
@@ -104,44 +72,37 @@ const ChatCreation = () => {
         queryKey: ["friends", userData.user.id],
       });
       setChatName("");
-      setParticipants([
-        {
-          id: userData.user.id,
-          username: userData.user.username,
-          profilePicture: userData.user.profilePicture,
-          role: "admin",
-        },
-      ]);
+      setParticipants([user]);
       setIsCreatingChat(false);
     },
   });
 
-  const addFriendMutation = useMutation({
-    mutationFn: addFriend,
+  const addMemberMutation = useMutation({
+    mutationFn: addMember,
     onSuccess: (friend) => {
 
-      setParticipants((prev: Array<Participant>) => [
+      setParticipants((prev: Array<ChatMember>) => [
         ...prev,
         { ...friend, role: "regular" },
       ]);
-      setFriendName("");
+      setMemberName("");
     },
   });
 
   const handleCreateChat = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!chatName.trim() || participants.length <= 1) return;
-    createChatMutation.mutate({ chatName, participants });
+    if (!chat_name.trim() || members.length <= 1) return;
+    createChatMutation.mutate({ chat_name, members });
   };
 
-  const handleAddFriend = (event: React.FormEvent) => {
+  const handleAddMember = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!friendName.trim()) return;
-    addFriendMutation.mutate(friendName);
+    if (!memberName.trim()) return;
+    addMemberMutation.mutate(memberName);
   };
 
-  const removeFriend = (id: string) => {
-    setParticipants((prev: Array<Participant>) =>
+  const removeMember = (id: number) => {
+    setParticipants((prev: Array<ChatMember>) =>
       prev.filter((p) => p.id !== id)
     );
   };
@@ -167,20 +128,20 @@ const ChatCreation = () => {
         <form onSubmit={handleCreateChat}>
           <TextInput
             placeholder="Chat Name"
-            value={chatName}
+            value={chat_name}
             onChange={(event) => setChatName(event.currentTarget.value)}
             className="mb-2"
             disabled={createChatMutation.isPending}
           />
           <TextInput
-            placeholder="Add Friend To Chat"
-            value={friendName}
-            onChange={(event) => setFriendName(event.currentTarget.value)}
-            disabled={addFriendMutation.isPending}
+            placeholder="Add User To Chat"
+            value={memberName}
+            onChange={(event) => setMemberName(event.currentTarget.value)}
+            disabled={addMemberMutation.isPending}
             className="pb-2"
             onKeyDown={(event) => {
               if (event.key === "Enter") {
-                handleAddFriend(event);
+                handleAddMember(event);
               }
             }}
             rightSection={(
@@ -188,8 +149,8 @@ const ChatCreation = () => {
                 size="sm"
                 variant="transparent"
                 className="text-text-light-secondary dark:text-text-dark-secondary"
-                onClick={handleAddFriend}
-                disabled={addFriendMutation.isPending}
+                onClick={handleAddMember}
+                disabled={addMemberMutation.isPending}
                 style={{ padding: "0 8px" }}
               >
                 <FaArrowCircleRight size={24} />
@@ -197,25 +158,25 @@ const ChatCreation = () => {
             )}
             rightSectionWidth={40}
           />
-          {addFriendMutation.isError && (
+          {addMemberMutation.isError && (
             <Text className="text-red" size="sm">
-              {addFriendMutation.error instanceof Error
-                ? addFriendMutation.error.message
+              {addMemberMutation.error instanceof Error
+                ? addMemberMutation.error.message
                 : "An error occurred"}
             </Text>
           )}
           <ScrollArea style={{ height: 150 }} className="mb-2">
-            {participants.map(
-              (participant: Participant) =>
-                participant.id !== userData.user.id && (
+            {members.map(
+              (member: ChatMember) =>
+                member.id !== userData.user.id && (
                   <div
-                    key={participant.id}
+                    key={member.id}
                     className="flex justify-between items-center mb-2 p-2 bg-surface-light dark:bg-surface-dark rounded"
                   >
                     <div className="flex items-center">
                       <Avatar
-                        src={participant.profilePicture}
-                        alt={participant.username}
+                        src={member.profile_picture}
+                        alt={member.username}
                         size="sm"
                         radius="xl"
                       />
@@ -224,14 +185,14 @@ const ChatCreation = () => {
                         size="sm"
                         ml={2}
                       >
-                        {participant.username}
+                        {member.username}
                       </Text>
                     </div>
                     <Button
                       size="xs"
                       variant="subtle"
                       color="red"
-                      onClick={() => removeFriend(participant.id)}
+                      onClick={() => removeMember(member.id)}
                     >
                       <FaTimes />
                     </Button>

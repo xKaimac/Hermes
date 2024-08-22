@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import Settings from '../settings/Settings';
 import { Textarea, ScrollArea, Avatar } from '@mantine/core';
-import { ChatProps } from '../../types/ChatProps';
-import { FaArrowCircleRight } from 'react-icons/fa';
-import { useUser } from '../../utils/UserContext';
 import { useMutation } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { FaArrowCircleRight } from 'react-icons/fa';
+
 import { Message } from '../../../../shared/types/Message';
+import { ChatProps } from '../../types/props/ChatProps';
+import { useUser } from '../../utils/UserContext';
+import Settings from '../settings/Settings';
 
 const Chat = ({ selectedChat }: ChatProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -46,9 +47,9 @@ const Chat = ({ selectedChat }: ChatProps) => {
     setIsLoading(true);
 
     try {
-      const allMessages = await getMessages(selectedChat.chat_id);
+      const allMessages = await getMessages(selectedChat.id);
 
-      setMessages(allMessages.result.messages);
+      setMessages(allMessages);
     } catch (err) {
       console.error(err);
     } finally {
@@ -56,7 +57,7 @@ const Chat = ({ selectedChat }: ChatProps) => {
     }
   };
 
-  const getMessages = async (chat_id: number) => {
+  const getMessages = async (chat_id: number): Promise<Array<Message>> => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-all-messages`,
       {
@@ -69,11 +70,11 @@ const Chat = ({ selectedChat }: ChatProps) => {
       }
     );
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch messages');
-    }
+    if (!response.ok) throw new Error('Failed to fetch messages');
 
-    return response.json();
+    const data = await response.json();
+
+    return data.result.messages;
   };
 
   const sendMessage = async ({ chat_id, sender_id, content }: Message) => {
@@ -89,9 +90,7 @@ const Chat = ({ selectedChat }: ChatProps) => {
       }
     );
 
-    if (!response.ok) {
-      throw new Error('Failed to send message');
-    }
+    if (!response.ok) throw new Error('Failed to send message');
 
     return response.json();
   };
@@ -111,11 +110,12 @@ const Chat = ({ selectedChat }: ChatProps) => {
     event?.preventDefault();
     if (message.trim().length <= 0) {
       setMessage("");
+      
       return;
     }
 
     mutation.mutate({
-      chat_id: selectedChat.chat_id,
+      chat_id: selectedChat.id,
       sender_id: userData.user.id,
       content: message,
     });
@@ -148,7 +148,7 @@ const Chat = ({ selectedChat }: ChatProps) => {
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row">
             {selectedChat && (
-              <Avatar src={selectedChat.chatPicture} radius="xl" size="md" />
+              <Avatar src={selectedChat.chat_picture} radius="xl" size="md" />
             )}
             <h1 className="text-text-light-primary dark:text-text-dark-primary pl-2 text-3xl">
               {selectedChat ? selectedChat.name : 'Select a chat'}

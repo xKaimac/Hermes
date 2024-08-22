@@ -1,16 +1,16 @@
 import { Button, Avatar } from "@mantine/core";
 import { useMutation } from "@tanstack/react-query";
+
+import { ProfilePictureUploadData } from "../../types/ProfilePictureUploadData";
 import { useUser } from "../../utils/UserContext";
 
-interface UploadData {
-  file: File;
-  userId: string;
-}
 
-const uploadProfilePicture = async ({ file, userId }: UploadData) => {
+const uploadProfilePicture = async ({ file, user_id }: ProfilePictureUploadData) => {
   const formData = new FormData();
-  formData.append("profilePicture", file);
-  formData.append("userId", userId);
+
+  formData.append("profile_picture", file);
+  formData.append("user_id", user_id.toString());
+
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/user/upload-profile-picture`,
     {
@@ -19,15 +19,15 @@ const uploadProfilePicture = async ({ file, userId }: UploadData) => {
       credentials: "include",
     }
   );
-  if (!response.ok) {
-    throw new Error("Upload failed");
-  }
+
+  if (!response.ok) throw new Error("Upload failed");
+
   return response.json();
 };
 
 const ProfilePictureUpload = () => {
   const { userData, updateUserData } = useUser();
-  const userId = userData.user.id;
+  const user_id = userData.user.id;
   const currentPicture = userData.user.profile_picture;
 
   const mutation = useMutation({
@@ -40,7 +40,8 @@ const ProfilePictureUpload = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-      mutation.mutate({ file, userId });
+
+      mutation.mutate({ file, user_id });
     }
   };
 

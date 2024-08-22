@@ -1,5 +1,5 @@
-import { FriendData } from "../../../types/FriendData";
-import pool from "../../config/db.config";
+import { User } from '../../../../shared/types/User';
+import pool from '../../config/db.config';
 
 const getProfilePicture = (profile: any) => {
   if (profile.photos && profile.photos.length > 0) {
@@ -8,13 +8,15 @@ const getProfilePicture = (profile: any) => {
   if (profile.id && profile.avatar) {
     return `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`;
   }
-  return null; // Default to null if no picture is available
+
+  return null;
 };
 
 const findOrCreateUser = async (provider: string, profile: any) => {
   const client = await pool.connect();
+
   try {
-    await client.query("BEGIN");
+    await client.query('BEGIN');
     const providerId = `${provider}_id`;
     const { rows } = await client.query(
       `SELECT * FROM users WHERE ${providerId} = $1`,
@@ -22,7 +24,7 @@ const findOrCreateUser = async (provider: string, profile: any) => {
     );
     let user;
     let isFirstLogin = false;
-    const statusType = "online";
+    const statusType = 'online';
 
     if (rows.length > 0) {
       // User exists, update the provider ID if it's not set
@@ -60,12 +62,14 @@ const findOrCreateUser = async (provider: string, profile: any) => {
           newUser.profile_picture,
         ]
       );
+
       user = newRows[0];
     }
-    await client.query("COMMIT");
+    await client.query('COMMIT');
+
     return { user, isFirstLogin };
   } catch (e) {
-    await client.query("ROLLBACK");
+    await client.query('ROLLBACK');
     throw e;
   } finally {
     client.release();
@@ -73,20 +77,21 @@ const findOrCreateUser = async (provider: string, profile: any) => {
 };
 
 export const findUserById = async (id: string) => {
-  const { rows } = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+  const { rows } = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+
   return rows[0];
 };
 
-export const findUserByName = async (name: string): Promise<FriendData> => {
+export const findUserByName = async (name: string): Promise<User> => {
   const { rows } = await pool.query(
-    "SELECT id, profile_picture FROM users WHERE username = $1",
+    'SELECT id, profile_picture FROM users WHERE username = $1',
     [name]
   );
 
-  const friendData: FriendData = {
+  const friendData: User = {
     id: rows[0].id,
     username: name,
-    profilePicture: rows[0].profile_picture,
+    profile_picture: rows[0].profile_picture,
   };
 
   return friendData;

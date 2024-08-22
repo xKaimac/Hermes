@@ -1,21 +1,21 @@
-import sendFriendRequest from '../../services/friends/addFriend.service';
-import getFriends from '../../services/friends/getFriends';
-import { Server } from 'socket.io';
-import handleFriendRequest from '../../services/friends/handleFriendRequest.service';
-import findFriend from '../../services/friends/findFriend';
 import express from 'express';
+
 import { isAuthenticated } from '../../middleware/auth.middleware';
+import sendFriendRequest from '../../services/friends/addFriend.service';
+import findFriend from '../../services/friends/findFriend';
+import getFriends from '../../services/friends/getFriends';
+import handleFriendRequest from '../../services/friends/handleFriendRequest.service';
 import { emitFriendRequest } from '../../services/socket/socket.service';
 
 const router = express.Router();
 
 router.post('/add-friend', isAuthenticated, async (req, res) => {
   try {
-    const { userId, friendName } = req.body;
-    const result = await sendFriendRequest(userId, friendName);
+    const { user_id, friendName } = req.body;
+    const result = await sendFriendRequest(user_id, friendName);
 
     if (result.success) {
-      emitFriendRequest(result.friendId, userId);
+      emitFriendRequest(result.friend_id, user_id);
 
       return res.status(200).json({
         message: 'Friend request sent successfully',
@@ -36,8 +36,8 @@ router.post('/add-friend', isAuthenticated, async (req, res) => {
 
 router.post('/get-friends', isAuthenticated, async (req, res) => {
   try {
-    const { userId } = req.body;
-    const result = await getFriends(userId);
+    const { user_id } = req.body;
+    const result = await getFriends(user_id);
 
     return res.status(200).json(result);
   } catch (error) {
@@ -48,8 +48,8 @@ router.post('/get-friends', isAuthenticated, async (req, res) => {
 
 router.post('/find-friend', isAuthenticated, async (req, res) => {
   try {
-    const { userId, friendName } = req.body;
-    const friend = await findFriend(userId, friendName);
+    const { user_id, friendName } = req.body;
+    const friend = await findFriend(user_id, friendName);
 
     if (!friend) throw new Error();
 
@@ -64,8 +64,8 @@ router.post('/find-friend', isAuthenticated, async (req, res) => {
 router.post('/handle-friend-request', isAuthenticated, async (req, res) => {
   try {
     console.log(req.body);
-    const { action, userId, friendId } = req.body;
-    const result = await handleFriendRequest(action, userId, friendId);
+    const { action, user_id, friend_id } = req.body;
+    const result = await handleFriendRequest(action, user_id, friend_id);
 
     return res.status(200).json({
       message: `Friend request handled successfully`,

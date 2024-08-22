@@ -1,4 +1,4 @@
-import pool from "../config/db.config";
+import pool from '../config/db.config';
 
 const createUsersTable = async () => {
   const createTableQuery = `
@@ -18,9 +18,8 @@ const createUsersTable = async () => {
 
   try {
     await pool.query(createTableQuery);
-    console.log("Users table created successfully");
   } catch (error) {
-    console.error("Error creating users table", error);
+    console.error('Error creating users table', error);
   }
 };
 
@@ -38,9 +37,8 @@ const createFriendsTable = async () => {
 
   try {
     await pool.query(createTableQuery);
-    console.log("Friends table created successfully");
   } catch (error) {
-    console.error("Error creating users table", error);
+    console.error('Error creating users table', error);
   }
 };
 
@@ -56,9 +54,8 @@ const createChatsTable = async () => {
 
   try {
     await pool.query(createTableQuery);
-    console.log("Chats table created successfully");
   } catch (error) {
-    console.error("Error creating users table", error);
+    console.error('Error creating users table', error);
   }
 };
 
@@ -76,9 +73,8 @@ const createChatParticipantsTable = async () => {
 
   try {
     await pool.query(createTableQuery);
-    console.log("ChatParticipants table created successfully");
   } catch (error) {
-    console.error("Error creating users table", error);
+    console.error('Error creating users table', error);
   }
 };
 
@@ -95,9 +91,8 @@ const createMessagesTable = async () => {
 
   try {
     await pool.query(createTableQuery);
-    console.log("Messages table created successfully");
   } catch (error) {
-    console.error("Error creating users table", error);
+    console.error('Error creating users table', error);
   }
 };
 

@@ -1,19 +1,9 @@
+import { ChatMember } from '../../../../shared/types/ChatMember';
 import pool from '../../config/db.config';
-import { FriendData } from '../../../types/FriendData';
 
-interface ChatMember extends FriendData {
-  role: string;
-  memberSince: number;
-}
-
-interface Result {
-  success: boolean;
-  members: Array<ChatMember>;
-}
-
-const getChatMembers = async (chat_id: number): Promise<Result> => {
+const getChatMembers = async (chat_id: number): Promise<Array<ChatMember>> => {
   const client = await pool.connect();
-  const result = { success: false, members: new Array<ChatMember>() };
+  const members = new Array<ChatMember>();
 
   try {
     await client.query('BEGIN;');
@@ -23,27 +13,25 @@ const getChatMembers = async (chat_id: number): Promise<Result> => {
     );
 
     await client.query('COMMIT');
-    result.success = true;
     for (const row of rows) {
       const member: ChatMember = {
         id: row.id,
         username: row.username,
-        profilePicture: row.profile_picture,
+        profile_picture: row.profile_picture,
         role: row.role,
-        memberSince: row.joined_at,
+        joined_at: row.joined_at,
       };
 
-      result.members.push(member);
+      members.push(member);
     }
   } catch (error) {
     console.log(error);
     await client.query('ROLLBACK');
-    result.success = false;
   } finally {
     client.release();
   }
 
-  return result;
+  return members;
 };
 
 export default getChatMembers;

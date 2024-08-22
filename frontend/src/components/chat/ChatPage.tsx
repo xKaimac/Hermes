@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import ChatMenu from '../navigation/chat-menu/ChatMenu';
-import Chat from './Chat';
+
+import { ChatValues } from '../../../../shared/types/ChatValues';
 import Profile from '../../pages/Profile';
-import { ChatValues } from '../../types/ChatValues';
+import ChatMenu from '../navigation/chat-menu/ChatMenu';
+
+import Chat from './Chat';
 
 const ChatPage = () => {
   const [selectedChat, setSelectedChat] = useState(null);

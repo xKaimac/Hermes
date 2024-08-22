@@ -4,7 +4,13 @@ module.exports = {
     es2021: true,
     node: true,
   },
-  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
+  ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 2021,
@@ -13,7 +19,12 @@ module.exports = {
       jsx: true,
     },
   },
-  plugins: ['@typescript-eslint', 'react'],
+  plugins: ['@typescript-eslint', 'react', 'import'],
+  settings: {
+    'import/resolver': {
+      typescript: {},
+    },
+  },
   rules: {
     'padding-line-between-statements': [
       'error',
@@ -59,5 +70,27 @@ module.exports = {
         prop: 'parens-new-line',
       },
     ],
+    'import/order': [
+      'error',
+      {
+        groups: [
+          'builtin',
+          'external',
+          'internal',
+          'parent',
+          'sibling',
+          'index',
+          'object',
+          'type',
+        ],
+        'newlines-between': 'always',
+        alphabetize: {
+          order: 'asc',
+          caseInsensitive: true,
+        },
+      },
+    ],
+    'import/newline-after-import': 'error',
+    'import/no-duplicates': 'error',
   },
 };

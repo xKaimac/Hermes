@@ -1,21 +1,18 @@
-import { useEffect } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScrollArea, Avatar, Button } from "@mantine/core";
-import AddFriend from "./AddFriend";
-import { useUser } from "../../utils/UserContext";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { FaCheck } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import { MdBlock } from "react-icons/md";
 import io from "socket.io-client";
-import { Friend } from "../../types/Friend";
 
-interface FriendsData {
-  confirmedFriends: Friend[];
-  outgoingRequests: Friend[];
-  incomingRequests: Friend[];
-}
+import { User } from "../../../../shared/types/User";
+import { FriendsListData } from "../../../../shared/types/FriendsListData";
+import { useUser } from "../../utils/UserContext";
 
-const fetchFriends = async (userId: string): Promise<FriendsData> => {
+import AddFriend from "./AddFriend";
+
+const fetchFriends = async (user_id: string): Promise<FriendsListData> => {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/friends/get-friends`,
     {
@@ -23,19 +20,19 @@ const fetchFriends = async (userId: string): Promise<FriendsData> => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId }),
+      body: JSON.stringify({ user_id }),
       credentials: "include",
     }
   );
-  if (!response.ok) {
-    throw new Error("Failed to fetch friends");
-  }
+
+  if (!response.ok) throw new Error("Failed to fetch friends");
+
   return response.json();
 };
 
-const FriendsList: React.FC = () => {
+const FriendsList = () => {
   const { userData } = useUser();
-  const userId = userData.user.id;
+  const user_id = userData.user.id;
   const queryClient = useQueryClient();
 
   const {
@@ -43,38 +40,35 @@ const FriendsList: React.FC = () => {
     isLoading,
     error,
     refetch,
-  } = useQuery<FriendsData, Error>({
-    queryKey: ["friends", userId],
-    queryFn: () => fetchFriends(userId),
-    enabled: !!userId,
+  } = useQuery<FriendsListData, Error>({
+    queryKey: ["friends", user_id],
+    queryFn: () => fetchFriends(user_id),
+    enabled: !!user_id,
   });
 
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_BACKEND_URL}`);
 
     socket.on("connect", () => {
-      console.log("Connected to Socket.IO server");
-      socket.emit("authenticate", { userId: userData.user.id });
+      socket.emit("authenticate", { user_id: userData.user.id });
     });
 
-    socket.on("friendRequest", (data: any) => {
-      console.log("Received friend request:", data);
-      queryClient.invalidateQueries({ queryKey: ["friends", userId] });
+    socket.on("friendRequest", () => {
+      queryClient.invalidateQueries({ queryKey: ["friends", user_id] });
     });
 
-    socket.on("friendRequestAccepted", (data: any) => {
-      console.log("Friend request accepted:", data);
-      queryClient.invalidateQueries({ queryKey: ["friends", userId] });
+    socket.on("friendRequestAccepted", () => {
+      queryClient.invalidateQueries({ queryKey: ["friends", user_id] });
     });
 
     return () => {
       socket.disconnect();
     };
-  }, [userId, queryClient, userData.user.id]);
+  }, [user_id, queryClient, userData.user.id]);
 
   const handleFriendAction = async (
     actionType: "accepted" | "reject" | "block",
-    friendId: string
+    friend_id: number
   ) => {
     try {
       const response = await fetch(
@@ -86,16 +80,14 @@ const FriendsList: React.FC = () => {
           },
           body: JSON.stringify({
             action: actionType,
-            userId: userData.user.id,
-            friendId: friendId,
+            user_id: userData.user.id,
+            friend_id: friend_id,
           }),
           credentials: "include",
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`Failed to ${actionType} friend request`);
-      }
+      if (!response.ok) throw new Error(`Failed to ${actionType} friend request`);
 
       refetch();
     } catch (error) {
@@ -104,19 +96,19 @@ const FriendsList: React.FC = () => {
   };
 
   const renderFriendList = (
-    friendList: Friend[],
+    friendList: User[],
     type: "accepted" | "outgoing" | "incoming"
   ) => (
     <ul className="divide-y divide-text-light-secondary/25 dark:divide-text-light-secondary/75">
       {friendList.map((friend) => (
         <li key={friend.id} className="flex flex-row mt-2 mb-2 p-5">
-          <Avatar src={friend.profilePicture} radius="xl" size="lg" />
+          <Avatar src={friend.profile_picture} radius="xl" size="lg" />
           <div className="pl-3 text-left overflow-hidden mt-auto mb-auto flex-grow">
             <a className="truncate text-lg text-text-light-primary dark:text-text-dark-primary">
               {friend.username}
             </a>
             <p className="truncate text-sm text-text-light-secondary dark:text-text-dark-secondary">
-              {friend.statusText}
+              {friend.status_text}
             </p>
           </div>
           {type === "outgoing" && (

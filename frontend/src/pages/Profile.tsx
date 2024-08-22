@@ -1,8 +1,9 @@
-import { useUser } from '../utils/UserContext';
+import { FiLogOut } from 'react-icons/fi';
+
+import FriendsList from '../components/profile/FriendsList';
 import ProfilePictureUpload from '../components/profile/ProfilePictureUpload';
 import StatusText from '../components/profile/StatusText';
-import FriendsList from '../components/profile/FriendsList';
-import { FiLogOut } from 'react-icons/fi';
+import { useUser } from '../utils/UserContext';
 
 const Profile = () => {
   const { userData, isLoading, error } = useUser();
@@ -20,9 +21,8 @@ const Profile = () => {
         }
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to logout');
-      }
+      if (!response.ok) throw new Error('Failed to logout');
+      
       window.location.href = `/login`;
     } catch (error) {
       console.error('Logout error:', error);
