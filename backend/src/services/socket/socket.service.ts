@@ -1,18 +1,22 @@
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 
 import { ChatValues } from '../../../../shared/types/ChatValues';
 import { Message } from '../../../../shared/types/Message';
 
 let io: Server;
-const userSocketMap = new Map<number, string>();
+const userSocketMap = new Map<string, string>();
 
 export const initializeSocket = (socketIo: Server) => {
   io = socketIo;
 
-  io.on('connection', (socket) => {
+  io.on('connection', (socket: Socket) => {
     socket.on('authenticate', (data: { user_id: number }) => {
-      userSocketMap.set(data.user_id, socket.id);
-      socket.join(data.user_id.toString());
+      if (data && typeof data.user_id === 'number') {
+        userSocketMap.set(data.user_id.toString(), socket.id);
+        socket.join(data.user_id.toString());
+      } else {
+        console.error('Invalid authentication data:', data);
+      }
     });
 
     socket.on('disconnect', () => {
@@ -28,20 +32,35 @@ export const initializeSocket = (socketIo: Server) => {
 };
 
 export const emitFriendRequest = (recipientId: number, senderId: string) => {
-  io.to(recipientId.toString()).emit('friendRequest', {
-    type: 'friendRequest',
-    senderId: senderId,
-  });
+  if (typeof recipientId === 'number') {
+    io.to(recipientId.toString()).emit('friendRequest', {
+      type: 'friendRequest',
+      senderId: senderId,
+    });
+  } else {
+    console.error('Invalid recipientId:', recipientId);
+  }
 };
 
 export const emitNewChat = (members: number[], chatData: ChatValues) => {
   members.forEach((user_id) => {
-    io.to(user_id.toString()).emit('newChat', chatData);
+    if (typeof user_id === 'number') {
+      io.to(user_id.toString()).emit('newChat', chatData);
+    } else {
+      console.error('Invalid user_id in members array:', user_id);
+    }
   });
 };
 
-export const emitNewMessage = (members: number[], messageData: Message) => {
+export const emitNewMessage = (
+  members: number[],
+  messageData: Message | undefined
+) => {
   members.forEach((user_id) => {
-    io.to(user_id.toString()).emit('newMessage', messageData);
+    if (typeof user_id === 'number') {
+      io.to(user_id.toString()).emit('newMessage', messageData);
+    } else {
+      console.error('Invalid user_id in members array:', user_id);
+    }
   });
 };

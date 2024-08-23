@@ -1,4 +1,4 @@
 export interface ChatPictureUploadData {
   file: File;
-  chat_id: string;
+  chat_id: number;
 }

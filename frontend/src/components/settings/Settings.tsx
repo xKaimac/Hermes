@@ -10,17 +10,15 @@ import AddChatMember from "./AddChatMember";
 import ChatPictureUpload from "./ChatPictureUpload";
 import UpdateChatName from "./UpdateChatName";
 
-const Settings = ({ selectedChat }: SettingsProps) => {
-  const [members, setMembers] = useState(new Array<ChatMember>());
+const Settings = ({ selectedChat, members }: SettingsProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [setError] = useState(null);
+  const [error, setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const { userData } = useUser();
   const user_id = userData.user.id;
 
   useEffect(() => {
     if (selectedChat) {
-      fetchChatMembers();
       fetchRoleStatus();
     }
   }, [selectedChat]);
@@ -43,43 +41,7 @@ const Settings = ({ selectedChat }: SettingsProps) => {
     }
   };
 
-  const fetchChatMembers = async () => {
-    if (!selectedChat) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const chatMembers = await getChatMembers(selectedChat.id);
-
-      setMembers(chatMembers.result.members);
-    } catch (err) {
-      setError("Failed to fetch chat members");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getChatMembers = async (chat_id: number) => {
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-members`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ chat_id }),
-        credentials: "include",
-      }
-    );
-
-    if (!response.ok) throw new Error("Failed to fetch chats");
-
-    return response.json();
-  };
-
-  const getRoleStatus = async (chat_id: number, user_id: number) => {
+    const getRoleStatus = async (chat_id: number, user_id: number) => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-role`,
       {

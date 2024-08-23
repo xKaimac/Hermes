@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import io from "socket.io-client";
 
 import { ChatValues } from "../../../../../shared/types/ChatValues";
+import { Message } from "../../../../../shared/types/Message";
 import { useUser } from "../../../utils/UserContext";
 
 import ChatCreation from "./ChatCreation";
@@ -60,6 +61,16 @@ const ChatMenu = ({ onChatSelect, onProfileClick }: ChatMenuProps) => {
       setChats((prevChats: Array<ChatValues>) => [...prevChats, newChat]);
     });
 
+    socket.on("newMessage", (newMessage: Message) => {
+      setChats((prevChats: Array<ChatValues>) => 
+        prevChats.map((chat) => 
+          chat.id === newMessage.chat_id
+            ? { ...chat, mostRecentMessage: newMessage.content }
+            : chat
+        )
+      );
+    });
+
     return () => {
       socket.disconnect();
     };
@@ -100,7 +111,7 @@ const ChatMenu = ({ onChatSelect, onProfileClick }: ChatMenuProps) => {
               onClick={() => onChatSelect(chat)}
             >
               <Avatar radius="xl" size="lg" src={chat.chat_picture} />
-              <div className="pl-2 overflow-hidden mt-auto mb-auto">
+              <div className="pl-2 mt-auto mb-auto">
                 <a className="block truncate">{chat.name}</a>
                 <p className="truncate text-sm text-gray-500">
                   {chat.mostRecentMessage}

@@ -9,7 +9,7 @@ const uploadChatPicture = async ({ file, chat_id }: ChatPictureUploadData) => {
   const formData = new FormData();
 
   formData.append("chat_picture", file);
-  formData.append("chat_id", chat_id);
+  formData.append("chat_id", chat_id.toString());
 
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/chats/upload-chat-picture`,

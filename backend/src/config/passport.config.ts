@@ -3,9 +3,19 @@ import { Strategy as DiscordStrategy } from 'passport-discord';
 import { Strategy as GitHubStrategy } from 'passport-github2';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
-import { PassportConfig } from '../../types/PassportConfig';
 import findOrCreateUser, { findUserById } from '../services/user/user.service';
 
+interface StrategyConfig {
+  clientID: string;
+  clientSecret: string;
+  callbackURL: string;
+  scope?: string[];
+}
+interface PassportConfig {
+  google: StrategyConfig;
+  discord: StrategyConfig;
+  github: StrategyConfig;
+}
 export const configurePassport = (config: PassportConfig) => {
   // Google Strategy
   passport.use(
@@ -16,7 +26,12 @@ export const configurePassport = (config: PassportConfig) => {
         callbackURL: config.google.callbackURL,
         scope: config.google.scope || ['profile'],
       },
-      async (profile: any, done: any) => {
+      async (
+        accessToken: string,
+        refreshToken: string,
+        profile: any,
+        done: any
+      ) => {
         try {
           const { user, isFirstLogin } = await findOrCreateUser(
             'google',
@@ -30,7 +45,6 @@ export const configurePassport = (config: PassportConfig) => {
       }
     )
   );
-
   // Discord Strategy
   passport.use(
     new DiscordStrategy(
@@ -40,7 +54,12 @@ export const configurePassport = (config: PassportConfig) => {
         callbackURL: config.discord.callbackURL,
         scope: config.discord.scope || ['identify'],
       },
-      async (profile: any, done: any) => {
+      async (
+        accessToken: string,
+        refreshToken: string,
+        profile: any,
+        done: any
+      ) => {
         try {
           const { user, isFirstLogin } = await findOrCreateUser(
             'discord',
@@ -54,7 +73,6 @@ export const configurePassport = (config: PassportConfig) => {
       }
     )
   );
-
   // GitHub Strategy
   passport.use(
     new GitHubStrategy(
@@ -64,7 +82,12 @@ export const configurePassport = (config: PassportConfig) => {
         callbackURL: config.github.callbackURL,
         scope: config.github.scope || ['read:user'],
       },
-      async (profile: any, done: any) => {
+      async (
+        accessToken: string,
+        refreshToken: string,
+        profile: any,
+        done: any
+      ) => {
         try {
           const { user, isFirstLogin } = await findOrCreateUser(
             'github',
@@ -78,11 +101,9 @@ export const configurePassport = (config: PassportConfig) => {
       }
     )
   );
-
   passport.serializeUser((user: any, done) => {
     done(null, user.id);
   });
-
   passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await findUserById(id);

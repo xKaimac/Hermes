@@ -1,5 +1,5 @@
 export interface ChatPictureUploadProps {
   isAdmin: boolean;
-  chat_id: string;
-  chat_picture: string;
+  chat_id: number;
+  chat_picture: string | undefined;
 }

@@ -3,26 +3,39 @@ import { useMutation } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { FaArrowCircleRight } from 'react-icons/fa';
 
+import { ChatMember } from '../../../../shared/types/ChatMember';
 import { Message } from '../../../../shared/types/Message';
+import { User } from '../../../../shared/types/User';
 import { ChatProps } from '../../types/props/ChatProps';
 import { useUser } from '../../utils/UserContext';
+import MessageBubble from '../message/MessageBubble';
 import Settings from '../settings/Settings';
+
+import io from 'socket.io-client';
 
 const Chat = ({ selectedChat }: ChatProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(new Array<Message>());
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [members, setMembers] = useState(new Array<ChatMember>())
+  const [error, setError] = useState(null)
   const { userData } = useUser();
+  const user: User = {
+    id: userData.user.id,
+    username: userData.user.username,
+    profile_picture: userData.user.profile_picture
+  }
 
   useEffect(() => {
     if (selectedChat) {
       fetchMessages();
+      fetchChatMembers();
     }
 
     const socket = io(`${import.meta.env.VITE_BACKEND_URL}`);
 
-    socket.emit('authenticate', { sender_id: userData.user.id });
+    socket.emit('authenticate', { user_id: userData.user.id });
 
     socket.on("newMessage", (newMessage: Message) => {
 
@@ -36,6 +49,44 @@ const Chat = ({ selectedChat }: ChatProps) => {
       socket.disconnect();
     };
   }, [selectedChat]);
+
+const fetchChatMembers = async () => {
+    if (!selectedChat) return;
+
+    setIsLoading(true);
+
+    try {
+      const chatMembers = await getChatMembers(selectedChat.id);
+
+      setMembers(chatMembers);
+    } catch (err) {
+      setError("Failed to fetch chat members");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getChatMembers = async (chat_id: number): Promise<Array<ChatMember>> => {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/protected/chats/get-members`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ chat_id }),
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to fetch chats");
+
+    const data = await response.json();
+
+    return data.result;
+  };
+
 
   const toggleSettings = () => {
     setIsSettingsOpen(!isSettingsOpen);
@@ -74,7 +125,7 @@ const Chat = ({ selectedChat }: ChatProps) => {
 
     const data = await response.json();
 
-    return data.result.messages;
+    return data.result;
   };
 
   const sendMessage = async ({ chat_id, sender_id, content }: Message) => {
@@ -92,8 +143,27 @@ const Chat = ({ selectedChat }: ChatProps) => {
 
     if (!response.ok) throw new Error('Failed to send message');
 
-    return response.json();
+    const data = await response.json();
+
+    return data
   };
+
+  const getSenderInfo = (sender_id: number): User => {
+    for (const member of members) {
+      if (member.id === sender_id) {
+        return {
+          id: member.id,
+          username: member.username,
+          profile_picture: member.profile_picture
+        }
+      }
+    }
+
+    return {
+      id: -1,
+      username: "Hermes User",
+    };
+  }
 
   const mutation = useMutation({
     mutationFn: sendMessage,
@@ -167,9 +237,7 @@ const Chat = ({ selectedChat }: ChatProps) => {
             {!isLoading &&
               messages.map((message: Message, index: number) => (
                 <div key={index} className="mb-2">
-                  Sent by: {message.sender_id}
-                  Content: {message.content}
-                  Time: {message.created_at && new Date(message.created_at).toString()}
+                  <MessageBubble message={message} user_info={user} sender_info={getSenderInfo(message.sender_id)} />
                 </div>
               ))}
           </ScrollArea>
@@ -187,7 +255,7 @@ const Chat = ({ selectedChat }: ChatProps) => {
           value={message}
         />
       </div>
-      {isSettingsOpen && <Settings selectedChat={selectedChat} />}
+      {isSettingsOpen && <Settings selectedChat={selectedChat} members={members} />}
     </div>
   );
 };
