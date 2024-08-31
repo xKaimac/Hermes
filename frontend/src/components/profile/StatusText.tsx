@@ -59,7 +59,7 @@ const StatusText = () => {
     return (
       <button
         onClick={handleClick}
-        className="p-2 text-surface-light dark:text-surface-dark w-10 h-10 flex items-center justify-center"
+        className="p-2 text-background-light dark:text-surface-dark w-10 h-10 flex items-center justify-center"
       >
         <FaArrowCircleRight />
       </button>

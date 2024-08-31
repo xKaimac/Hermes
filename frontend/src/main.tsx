@@ -4,7 +4,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { routeTree } from "./routeTree.gen";
 import { MantineProvider } from "@mantine/core";
-import { UserProvider, useUser } from "./utils/UserContext";
+import { UserProvider } from "./utils/UserContext";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 

@@ -23,8 +23,8 @@ const uploadChatPicture = async ({ file, chat_id }: ChatPictureUploadData) => {
   if (!response.ok) throw new Error("Upload failed");
 
   const data = await response.json();
-  
-  return data.chat_picture;
+
+  return data.result.secure_url;
 };
 
 const ChatPictureUpload = ({

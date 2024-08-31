@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "eslint": "^9.9.1"
+  },
+    "scripts": {
+      "start:frontend": "cd frontend && npm i && npm build",
+      "start:backend": "cd backend && npm i && npm start"
+    }
+
+}

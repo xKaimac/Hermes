@@ -11,7 +11,7 @@ const Profile = () => {
   const logout = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/user/logout`,
+        `${import.meta.env.VITE_BACKEND_URL}/protected/user/logout`,
         {
           method: 'GET',
           headers: {

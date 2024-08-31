@@ -71,6 +71,26 @@ const ChatMenu = ({ onChatSelect, onProfileClick }: ChatMenuProps) => {
       );
     });
 
+    socket.on("chatPictureUpdate", (update: ChatValues) => {
+      setChats((prevChats: Array<ChatValues>) =>
+        prevChats.map((chat) =>
+          chat.id === update.id
+            ? { ...chat, chat_picture: update.chat_picture }
+            : chat
+        )
+      );
+    });
+
+    socket.on("chatNameUpdate", (update: ChatValues) => {
+      setChats((prevChats: Array<ChatValues>) =>
+        prevChats.map((chat) =>
+          chat.id === update.id
+            ? { ...chat, name: update.name }
+            : chat
+        )
+      );
+    });
+
     return () => {
       socket.disconnect();
     };

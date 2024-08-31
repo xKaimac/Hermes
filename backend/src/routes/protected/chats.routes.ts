@@ -16,7 +16,16 @@ import uploadChatPicture from '../../services/chats/uploadChatPicture.service';
 import {
   emitNewChat,
   emitNewMessage,
+  emitMessageLikeUpdate,
+  emitChatPictureUpdate,
+  emitChatNameUpdate
 } from '../../services/socket/socket.service';
+import likeMessage from '../../services/messages/likeMessage.service';
+import unlikeMessage from '../../services/messages/unlikeMessage.service';
+import getMessage from '../../services/messages/getMessage.service';
+import { ChatValues } from '../../../../shared/types/ChatValues';
+import getChat from '../../services/chats/getChat.service';
+import updateChatName from '../../services/chats/updateChatName.service';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -27,7 +36,7 @@ router.post('/create-chat', isAuthenticated, async (req, res) => {
     const newChat = await createChat(chat_name, members);
 
     emitNewChat(
-      members.members.map((member: ChatMember) => member.id),
+      members.map((member: ChatMember) => member.id),
       newChat
     );
 
@@ -89,6 +98,7 @@ router.post('/get-members', isAuthenticated, async (req, res) => {
 
 router.post('/get-role', isAuthenticated, async (req, res) => {
   try {
+    console.log(req.body)
     const { user_id, chat_id } = req.body;
     const success = await getRole(user_id, chat_id);
 
@@ -130,7 +140,41 @@ router.post(
       const { chat_id } = req.body;
       const result: any = await uploadChatPicture(req.file);
 
-      updateChatPicture(chat_id, result.secure_url);
+      await updateChatPicture(chat_id, result.secure_url);
+      const chat: ChatValues | null = await getChat(chat_id);
+      const members: Array<ChatMember> = await getChatMembers(chat_id)
+
+      if (chat) {
+        emitChatPictureUpdate(
+          members.map((member: ChatMember) => member.id),
+            chat
+        );
+     } 
+
+      return res.status(200).json({ message: 'Upload successful', result });
+    } catch (error) {
+      return res.status(500).send('Error uploading file');
+    }
+  }
+);
+
+router.post(
+  '/update-chat-name',
+  isAuthenticated,
+  async (req, res) => {
+    try {
+      const { chat_name, chat_id } = req.body;
+      const result: any = await updateChatName(chat_name, chat_id);
+
+      const chat: ChatValues | null = await getChat(chat_id);
+      const members: Array<ChatMember> = await getChatMembers(chat_id)
+
+      if (chat) {
+        emitChatNameUpdate(
+          members.map((member: ChatMember) => member.id),
+            chat
+        );
+     } 
 
       return res.status(200).json({ message: 'Upload successful', result });
     } catch (error) {
@@ -141,8 +185,8 @@ router.post(
 
 router.post('/get-all-messages', isAuthenticated, async (req, res) => {
   try {
-    const { chat_id } = req.body;
-    const result = await getAllMessages(chat_id);
+    const { chat_id, current_user_id } = req.body;
+    const result = await getAllMessages(chat_id, current_user_id);
 
     return res
       .status(200)
@@ -154,9 +198,9 @@ router.post('/get-all-messages', isAuthenticated, async (req, res) => {
 
 router.post('/send-message', isAuthenticated, async (req, res) => {
   try {
-    const { chat_id, sender_id, content } = req.body;
+    const { chat_id, sender_id, content, reply_to_id } = req.body;
 
-    const result = await sendMessage(chat_id, sender_id, content);
+    const result = await sendMessage(chat_id, sender_id, content, reply_to_id);
     const members = await getChatMembers(chat_id);
 
     emitNewMessage(
@@ -171,5 +215,42 @@ router.post('/send-message', isAuthenticated, async (req, res) => {
     return res.status(500).json({ message: 'Failed to send message' });
   }
 });
+
+router.post('/like-message', isAuthenticated, async (req, res) => {
+  try {
+    const { message_id, user_id } = req.body;
+    const result = await likeMessage(message_id, user_id);
+    const message = await getMessage(message_id, user_id);
+
+    if (message) {
+      const chatMembers = await getChatMembers(message.chat_id);
+      emitMessageLikeUpdate(chatMembers.map(member => member.id), message);
+    }
+    return res
+      .status(200)
+      .json({ message: 'Message liked successfully!', result });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to like message' });
+  }
+});
+
+router.post('/unlike-message', isAuthenticated, async (req, res) => {
+  try {
+    const { message_id, user_id } = req.body;
+    const result = await unlikeMessage(message_id, user_id);
+    const message = await getMessage(message_id, user_id);
+      
+    if (message) {
+      const chatMembers = await getChatMembers(message.chat_id);
+      emitMessageLikeUpdate(chatMembers.map(member => member.id), message);
+    }
+    return res
+      .status(200)
+      .json({ message: 'Message unliked successfully!', result });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to unlike message' });
+  }
+});
+
 
 export default router;

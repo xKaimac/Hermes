@@ -38,7 +38,7 @@ const createFriendsTable = async () => {
   try {
     await pool.query(createTableQuery);
   } catch (error) {
-    console.error('Error creating users table', error);
+    console.error('Error creating friends table', error);
   }
 };
 
@@ -55,7 +55,7 @@ const createChatsTable = async () => {
   try {
     await pool.query(createTableQuery);
   } catch (error) {
-    console.error('Error creating users table', error);
+    console.error('Error creating chats table', error);
   }
 };
 
@@ -74,7 +74,7 @@ const createChatParticipantsTable = async () => {
   try {
     await pool.query(createTableQuery);
   } catch (error) {
-    console.error('Error creating users table', error);
+    console.error('Error creating chat participants table', error);
   }
 };
 
@@ -85,6 +85,7 @@ const createMessagesTable = async () => {
     chat_id INTEGER REFERENCES chats(id),
     sender_id INTEGER REFERENCES users(id),
     content TEXT,
+    reply_to_id INTEGER REFERENCES messages(id),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
   );
   `;
@@ -92,7 +93,24 @@ const createMessagesTable = async () => {
   try {
     await pool.query(createTableQuery);
   } catch (error) {
-    console.error('Error creating users table', error);
+    console.error('Error creating messages table', error);
+  }
+};
+
+const createMessageLikesTable = async () => {
+  const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS message_likes (
+    id SERIAL PRIMARY KEY,
+    message_id INTEGER REFERENCES messages(id),
+    user_id INTEGER REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(message_id, user_id)
+  );  `;
+
+  try {
+    await pool.query(createTableQuery);
+  } catch (error) {
+    console.error('Error creating message likes table', error);
   }
 };
 
@@ -102,6 +120,7 @@ const createAllTables = () => {
   createChatsTable();
   createChatParticipantsTable();
   createMessagesTable();
+  createMessageLikesTable();
 };
 
 export default createAllTables;

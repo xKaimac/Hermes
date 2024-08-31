@@ -12,7 +12,7 @@ import UpdateChatName from "./UpdateChatName";
 
 const Settings = ({ selectedChat, members }: SettingsProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [setError] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const { userData } = useUser();
   const user_id = userData.user.id;
@@ -58,7 +58,7 @@ const Settings = ({ selectedChat, members }: SettingsProps) => {
 
     const data = await response.json();
 
-    return data.role;
+    return data.result;
   };
 
   const formatTimestamp = (timestamp: number) => {

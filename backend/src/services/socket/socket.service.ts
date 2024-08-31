@@ -64,3 +64,43 @@ export const emitNewMessage = (
     }
   });
 };
+
+export const emitMessageLikeUpdate = (
+  members: number[],
+  messageData: Message
+) => {
+  members.forEach((user_id) => {
+    if (typeof user_id === 'number') {
+      io.to(user_id.toString()).emit('messageLikeUpdate', messageData);
+    } else {
+      console.error('Invalid user_id in members array:', user_id);
+    }
+  });
+};
+
+export const emitChatPictureUpdate = (
+  members: number[],
+  chat: ChatValues
+) => {
+  members.forEach((user_id) => {
+    if (typeof user_id === 'number') {
+      io.to(user_id.toString()).emit('chatPictureUpdate', chat);
+    } else {
+      console.error('Invalid user_id in members array:', user_id);
+    }
+  });
+};
+
+export const emitChatNameUpdate = (
+  members: number[],
+  chat: ChatValues
+) => {
+  members.forEach((user_id) => {
+    console.log("sending to...." + user_id)
+    if (typeof user_id === 'number') {
+      io.to(user_id.toString()).emit('chatNameUpdate', chat);
+    } else {
+      console.error('Invalid user_id in members array:', user_id);
+    }
+  });
+};

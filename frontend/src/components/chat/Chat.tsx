@@ -1,7 +1,7 @@
 import { Textarea, ScrollArea, Avatar } from '@mantine/core';
 import { useMutation } from '@tanstack/react-query';
-import { useState, useEffect } from 'react';
-import { FaArrowCircleRight } from 'react-icons/fa';
+import { useState, useEffect, useRef } from 'react';
+import { FaArrowCircleRight, FaTimes } from 'react-icons/fa';
 
 import { ChatMember } from '../../../../shared/types/ChatMember';
 import { Message } from '../../../../shared/types/Message';
@@ -12,6 +12,7 @@ import MessageBubble from '../message/MessageBubble';
 import Settings from '../settings/Settings';
 
 import io from 'socket.io-client';
+import { useCallback } from 'react';
 
 const Chat = ({ selectedChat }: ChatProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -19,7 +20,11 @@ const Chat = ({ selectedChat }: ChatProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [members, setMembers] = useState(new Array<ChatMember>())
-  const [error, setError] = useState(null)
+  const [setError] = useState(null)
+  const [replyTo, setReplyTo] = useState(null);
+  const inputRef = useRef(null);
+  const viewportRef = useRef(null)
+  const lastMessageRef = useRef(null);
   const { userData } = useUser();
   const user: User = {
     id: userData.user.id,
@@ -43,6 +48,18 @@ const Chat = ({ selectedChat }: ChatProps) => {
         ...prevMessages,
         newMessage,
       ]);
+        
+      setTimeout(() => {
+        lastMessageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }, 100);
+    });
+
+    socket.on("messageLikeUpdate", (updatedMessage: Message) => {
+      setMessages((prevMessages: Array<Message>) => 
+        prevMessages.map((msg) => 
+          msg.id === updatedMessage.id ? updatedMessage : msg
+        )
+      );
     });
 
     return () => {
@@ -50,7 +67,18 @@ const Chat = ({ selectedChat }: ChatProps) => {
     };
   }, [selectedChat]);
 
-const fetchChatMembers = async () => {
+  const scrollToBottom = useCallback(() => {
+    if (viewportRef.current) {
+      const scrollContainer = viewportRef.current;
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const fetchChatMembers = async () => {
     if (!selectedChat) return;
 
     setIsLoading(true);
@@ -116,7 +144,7 @@ const fetchChatMembers = async () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ chat_id }),
+        body: JSON.stringify({ chat_id, current_user_id: userData.user.id }),
         credentials: 'include',
       }
     );
@@ -127,8 +155,8 @@ const fetchChatMembers = async () => {
 
     return data.result;
   };
-
-  const sendMessage = async ({ chat_id, sender_id, content }: Message) => {
+    
+  const sendMessage = async ({ chat_id, sender_id, content, reply_to_id }: Message) => {
     const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/protected/chats/send-message`,
       {
@@ -136,7 +164,7 @@ const fetchChatMembers = async () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ chat_id, sender_id, content }),
+        body: JSON.stringify({ chat_id, sender_id, content, reply_to_id }),
         credentials: 'include',
       }
     );
@@ -169,6 +197,7 @@ const fetchChatMembers = async () => {
     mutationFn: sendMessage,
     onSuccess: () => {
       setMessage("");
+      setReplyTo(null);
     },
   });
 
@@ -188,6 +217,7 @@ const fetchChatMembers = async () => {
       chat_id: selectedChat.id,
       sender_id: userData.user.id,
       content: message,
+      reply_to_id: replyTo?.id
     });
     setMessage("");
   };
@@ -199,11 +229,25 @@ const fetchChatMembers = async () => {
     }
   };
 
+  const handleReply = (message: Message) => {
+    setReplyTo(message);
+    inputRef.current?.focus();
+  };
+
+  const cancelReply = () => {
+    setReplyTo(null);
+  };
+
+const getRepliedMessage = useCallback((replyToId: number): Message | undefined => {
+  return messages.find((msg: { id: number; }) => msg.id === replyToId);
+}, [messages]);
+
+
   const EnterComponent = () => {
     return (
       <button
         onClick={handleClick}
-        className="text-surface-light dark:text-surface-dark flex h-10 w-10 items-center justify-center p-2"
+        className="text-background-light dark:text-surface-dark flex h-10 w-10 items-center justify-center p-2"
       >
         <FaArrowCircleRight />
       </button>
@@ -232,28 +276,54 @@ const fetchChatMembers = async () => {
           </button>
         </div>
         <div className="flex-grow overflow-hidden">
-          <ScrollArea className="h-full">
+          <ScrollArea className="h-full" viewportRef={viewportRef}>
             {isLoading && <p className="p-4">Loading...</p>}
             {!isLoading &&
-              messages.map((message: Message, index: number) => (
-                <div key={index} className="mb-2">
-                  <MessageBubble message={message} user_info={user} sender_info={getSenderInfo(message.sender_id)} />
-                </div>
-              ))}
-          </ScrollArea>
+            messages.map((message: Message, index: number) => (
+            <div 
+              key={index} 
+              className="mb-2"
+              ref={index === messages.length - 1 ? lastMessageRef : null}
+            >
+              <MessageBubble 
+                message={message} 
+                user_info={user} 
+                sender_info={getSenderInfo(message.sender_id)} 
+                onReply={handleReply}
+                getRepliedMessage={getRepliedMessage}
+              />
+            </div>
+          ))}
+        </ScrollArea>
+      </div>
+      {replyTo && (
+        <div className="bg-surface-light dark:bg-surface-dark px-2 py-1 rounded-t-md flex items-center text-xs w-full">
+        <div className="flex-1 min-w-0 mr-2 w-full">
+        <span className="font-semibold text-text-light-primary dark:text-text-dark-primary truncate inline-block w-full">
+        Replying to {getSenderInfo(replyTo.sender_id).username}
+        </span>
         </div>
-        <Textarea
-          autosize
-          className="mt-2 mb-2 p-2"
-          id="messageBox"
-          radius="xl"
-          maxRows={25}
-          rightSection={<EnterComponent />}
-          placeholder="Type your message here"
-          onChange={handleOnChange}
-          onKeyPress={handleKeyPress}
-          value={message}
-        />
+        <button 
+        onClick={cancelReply} 
+        className="text-text-light-secondary dark:text-text-dark-secondary hover:text-primary-light dark:hover:text-primary-dark transition-colors flex-shrink-0"
+        >
+        <FaTimes size={12} />
+        </button>
+        </div>
+      )}
+      <Textarea
+        ref={inputRef}
+        autosize
+        className="mt-2 mb-2 p-2"
+        id="messageBox"
+        radius="xl"
+        maxRows={25}
+        rightSection={<EnterComponent />}
+        placeholder={replyTo ? "Type your reply here" : "Type your message here"}
+        onChange={handleOnChange}
+        onKeyPress={handleKeyPress}
+        value={message}
+      />
       </div>
       {isSettingsOpen && <Settings selectedChat={selectedChat} members={members} />}
     </div>

@@ -48,6 +48,7 @@ router.post('/get-friends', isAuthenticated, async (req, res) => {
 
 router.post('/find-friend', isAuthenticated, async (req, res) => {
   try {
+    console.log(req.body)
     const { user_id, friendName } = req.body;
     const friend = await findFriend(user_id, friendName);
 
@@ -63,7 +64,6 @@ router.post('/find-friend', isAuthenticated, async (req, res) => {
 
 router.post('/handle-friend-request', isAuthenticated, async (req, res) => {
   try {
-    console.log(req.body);
     const { action, user_id, friend_id } = req.body;
     const result = await handleFriendRequest(action, user_id, friend_id);
 

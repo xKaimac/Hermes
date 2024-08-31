@@ -33,13 +33,14 @@ const createChat = async ({
   if (!response.ok) throw new Error("Failed to create chat");
 };
 
-const addMember = async (friendName: string): Promise<User> => {
+
+const addMember = async ({ user_id, friendName }: { user_id: number; friendName: string }): Promise<User> => {
   const response = await fetch(
     `${import.meta.env.VITE_BACKEND_URL}/protected/friends/find-friend`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ friendName }),
+      body: JSON.stringify({ user_id, friendName }),
       credentials: "include",
     }
   );
@@ -48,8 +49,11 @@ const addMember = async (friendName: string): Promise<User> => {
 
   const data = await response.json();
 
-  return data.result.friend;
+  console.log(data)
+
+  return data.result;
 };
+
 
 const ChatCreation = () => {
   const [isCreatingChat, setIsCreatingChat] = useState(false);
@@ -80,6 +84,7 @@ const ChatCreation = () => {
   const addMemberMutation = useMutation({
     mutationFn: addMember,
     onSuccess: (friend) => {
+      console.log(friend)
 
       setParticipants((prev: Array<ChatMember>) => [
         ...prev,
@@ -98,7 +103,7 @@ const ChatCreation = () => {
   const handleAddMember = (event: React.FormEvent) => {
     event.preventDefault();
     if (!memberName.trim()) return;
-    addMemberMutation.mutate(memberName);
+    addMemberMutation.mutate({ user_id: user.id, friendName: memberName });
   };
 
   const removeMember = (id: number) => {

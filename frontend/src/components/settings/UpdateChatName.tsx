@@ -19,29 +19,24 @@ const UpdateChatName = ({
     setCurrentChatName(chat_name);
   }, [chat_name]);
 
-  const updateChatName = async ({ chat_name, chat_id }: ChatNameUploadData) => {
+  const updateChatName = async ({ chat_id }: ChatNameUploadData) => {
     const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}/protected/chat/update-chat-name`,
+      `${import.meta.env.VITE_BACKEND_URL}/protected/chats/update-chat-name`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ chat_name, chat_id }),
+        body: JSON.stringify({ chat_name: currentChatName, chat_id }),
         credentials: "include",
       }
     );
 
     if (!response.ok) throw new Error("Upload failed");
-    
-    return response.json();
   };
 
   const mutation = useMutation({
     mutationFn: updateChatName,
-    onSuccess: (data) => {
-      setCurrentChatName(data.chat_name);
-    },
   });
 
   const handleClick = (event?: React.MouseEvent) => {
@@ -65,7 +60,7 @@ const UpdateChatName = ({
     return (
       <button
         onClick={handleClick}
-        className="p-2 text-surface-light dark:text-surface-dark w-10 h-10 flex items-center justify-center"
+        className="p-2 text-background-light dark:text-surface-dark w-10 h-10 flex items-center justify-center"
       >
         <FaArrowCircleRight />
       </button>
