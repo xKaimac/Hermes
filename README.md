@@ -1,3 +1,5 @@
+To see the backend code, head to [This repo!](https://www.github.com/xKaimac/hermes-api)
+
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
